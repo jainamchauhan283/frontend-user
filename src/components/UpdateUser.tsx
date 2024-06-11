@@ -1,6 +1,51 @@
+import React, { useState, useEffect } from "react";
 import { Box, Button, Card, TextField, Typography } from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const UpdateUser: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [user, setUser] = useState({
+    _id: "",
+    userName: "",
+    userEmail: "",
+    userMobile: "",
+  });
+
+  useEffect(() => {
+    if (location.state && location.state.user) {
+      setUser(location.state.user);
+    }
+  }, [location.state]);
+
+  const handleCancel = () => {
+    navigate("/", { replace: true });
+  };
+
+  const handleUpdate = () => {
+    // Perform update logic here
+    // For demonstration, let's assume we're updating the user with an API call
+    axios
+      .patch(`http://localhost:5000/userData/patch/${user._id}`, user)
+      .then((res) => {
+        console.log("User updated:", res.data);
+        navigate("/", { replace: true });
+      })
+      .catch((error) => {
+        console.error("Error updating user:", error);
+        // Handle error
+      });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUser({
+      ...user,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   return (
     <Box
       sx={{
@@ -28,6 +73,9 @@ const UpdateUser: React.FC = () => {
           autoComplete="userName"
           fullWidth
           margin="normal"
+          name="userName"
+          value={user.userName}
+          onChange={handleChange}
         />
         <TextField
           label="Email"
@@ -35,6 +83,9 @@ const UpdateUser: React.FC = () => {
           autoComplete="email"
           fullWidth
           margin="normal"
+          name="userEmail"
+          value={user.userEmail}
+          onChange={handleChange}
         />
         <TextField
           label="Mobile"
@@ -42,8 +93,11 @@ const UpdateUser: React.FC = () => {
           autoComplete="mobile"
           fullWidth
           margin="normal"
+          name="userMobile"
+          value={user.userMobile}
+          onChange={handleChange}
         />
-         <Box
+        <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
@@ -55,6 +109,7 @@ const UpdateUser: React.FC = () => {
             fullWidth
             sx={{ width: "calc(50% - 8px)" }}
             color="error"
+            onClick={handleCancel}
           >
             Cancel
           </Button>
@@ -63,6 +118,7 @@ const UpdateUser: React.FC = () => {
             fullWidth
             sx={{ width: "calc(50% - 8px)" }}
             color="primary"
+            onClick={handleUpdate}
           >
             Update
           </Button>

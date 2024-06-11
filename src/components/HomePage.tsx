@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 const baseUrl = "http://localhost:5000/userData"; // BASEURL
 
@@ -51,6 +51,10 @@ const HomePage: React.FC = () => {
     navigate("/addUser", { replace: true });
   };
 
+  const handleEdit = (user: User) => {
+    navigate("/updateUser", { state: { user }, replace: true });
+  };
+
   const handleDelete = (id: string) => {
     setDeleteUserId(id);
     setDeleteDialogOpen(true);
@@ -58,7 +62,7 @@ const HomePage: React.FC = () => {
 
   const confirmDelete = () => {
     axios
-      .delete(`${baseUrl}/delete/${deleteUserId}`)
+      .delete<void>(`${baseUrl}/delete/${deleteUserId}`)
       .then((res) => {
         console.log("Deleted:", res.data);
         // Update the local data state after deletion
@@ -109,7 +113,11 @@ const HomePage: React.FC = () => {
                     </Typography>
                   </CardContent>
                   <CardActions>
-                    <Button variant="outlined" fullWidth sx={{ mr: 1 }}>
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      onClick={() => handleEdit(user)}
+                    >
                       Edit
                     </Button>
                     <Button
