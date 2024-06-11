@@ -118,12 +118,9 @@ const AddUser: React.FC = () => {
         navigate("/", { replace: true });
       })
       .catch((error) => {
-        console.error("Error adding data:", error);
-        if (
-          error.response &&
-          error.response.data.error === "Email already exists"
-        ) {
-          setEmailError("Email already exists");
+        console.error("Error adding data", error);
+        if (error.response) {
+          setEmailError(error.response.data.error);
         } else {
           // Handle other errors or display a generic error message
         }

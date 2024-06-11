@@ -104,7 +104,7 @@ const HomePage: React.FC = () => {
               >
                 <Card>
                   <CardContent>
-                    <Typography variant="h6">{user.userName}</Typography>
+                    <Typography variant="h6" align="center">{user.userName}</Typography>
                     <Typography variant="body1" color="text.secondary">
                       <strong>Email :</strong> {user.userEmail}
                     </Typography>
