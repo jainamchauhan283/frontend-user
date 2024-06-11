@@ -13,10 +13,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Fab,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-const baseUrl = "http://localhost:5000/userData";
+const baseUrl = "http://localhost:5000/userData"; // BASEURL
 
 interface User {
   _id: string;
@@ -27,6 +30,7 @@ interface User {
 
 const HomePage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [deleteUserId, setDeleteUserId] = useState<string>("");
 
@@ -42,6 +46,10 @@ const HomePage: React.FC = () => {
 
     fetchUsers();
   }, []);
+
+  const handleAddUser = () => {
+    navigate("/addUser", { replace: true });
+  };
 
   const handleDelete = (id: string) => {
     setDeleteUserId(id);
@@ -83,7 +91,7 @@ const HomePage: React.FC = () => {
               <Box
                 sx={{
                   border: "1px solid #3f51b5",
-                //   borderRadius: "8px",
+                  //   borderRadius: "8px",
                   transition: "transform 0.2s",
                   "&:hover": {
                     transform: "scale(1.05)",
@@ -118,6 +126,14 @@ const HomePage: React.FC = () => {
             </Grid>
           ))}
         </Grid>
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{ position: "fixed", bottom: 16, right: 16 }}
+          onClick={handleAddUser}
+        >
+          <AddIcon />
+        </Fab>
         <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
           <DialogTitle>Delete User</DialogTitle>
           <DialogContent>
