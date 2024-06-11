@@ -9,6 +9,10 @@ import {
   CardContent,
   CardActions,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import axios from "axios";
 
@@ -23,6 +27,8 @@ interface User {
 
 const HomePage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [deleteUserId, setDeleteUserId] = useState<string>("");
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -36,6 +42,32 @@ const HomePage: React.FC = () => {
 
     fetchUsers();
   }, []);
+
+  const handleDelete = (id: string) => {
+    setDeleteUserId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    axios
+      .delete(`${baseUrl}/delete/${deleteUserId}`)
+      .then((res) => {
+        console.log("Deleted:", res.data);
+        // Update the local data state after deletion
+        setUsers((prevUsers) =>
+          prevUsers.filter((user) => user._id !== deleteUserId)
+        );
+        setDeleteDialogOpen(false);
+      })
+      .catch((error) => {
+        console.error("Error deleting user:", error);
+      });
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setDeleteUserId("");
+  };
 
   return (
     <>
@@ -51,6 +83,7 @@ const HomePage: React.FC = () => {
               <Box
                 sx={{
                   border: "1px solid #3f51b5",
+                //   borderRadius: "8px",
                   transition: "transform 0.2s",
                   "&:hover": {
                     transform: "scale(1.05)",
@@ -71,7 +104,12 @@ const HomePage: React.FC = () => {
                     <Button variant="outlined" fullWidth sx={{ mr: 1 }}>
                       Edit
                     </Button>
-                    <Button variant="contained" fullWidth sx={{ mr: 1 }}>
+                    <Button
+                      variant="contained"
+                      sx={{ mr: 1 }}
+                      fullWidth
+                      onClick={() => handleDelete(user._id)}
+                    >
                       Delete
                     </Button>
                   </CardActions>
@@ -80,6 +118,20 @@ const HomePage: React.FC = () => {
             </Grid>
           ))}
         </Grid>
+        <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
+          <DialogTitle>Delete User</DialogTitle>
+          <DialogContent>
+            <Typography variant="body1">
+              Are you sure you want to delete this user?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={cancelDelete}>Cancel</Button>
+            <Button onClick={confirmDelete} color="error">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </>
   );
