@@ -104,18 +104,22 @@ const HomePage: React.FC = () => {
                 }}
               >
                 <Card>
-                  <CardContent>
-                    {/* {user.userImage && ( */}
+                  <CardContent
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
                     <img
                       src={`http://localhost:5000/files/${user.userImage}`}
                       alt={`${user.userName}'s profile`}
                       style={{
                         maxWidth: "100%",
                         maxHeight: "150px",
-                        objectFit: "cover",
+                        minHeight: "150px",
                       }}
                     />
-                    {/* )} */}
                     <Typography variant="h6" align="center">
                       {user.userName}
                     </Typography>
