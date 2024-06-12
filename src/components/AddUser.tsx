@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 import { Box, Card, TextField, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -17,8 +17,9 @@ const AddUser: React.FC = () => {
   const [mobileError, setMobileError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [image, setImage] = useState<File | null>(null);
 
-  const onChangeName = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangeName = (event: ChangeEvent<HTMLInputElement>) => {
     const newName = event.target.value;
     setName(newName);
     if (!newName) {
@@ -28,7 +29,7 @@ const AddUser: React.FC = () => {
     }
   };
 
-  const onChangeEmail = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangeEmail = (event: ChangeEvent<HTMLInputElement>) => {
     const newEmail = event.target.value;
     setEmail(newEmail);
     if (!newEmail) {
@@ -40,7 +41,7 @@ const AddUser: React.FC = () => {
     }
   };
 
-  const onChangeMobile = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangeMobile = (event: ChangeEvent<HTMLInputElement>) => {
     const newMobile = event.target.value;
     setMobile(newMobile);
     if (!newMobile) {
@@ -50,7 +51,7 @@ const AddUser: React.FC = () => {
     }
   };
 
-  const onChangePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangePassword = (event: ChangeEvent<HTMLInputElement>) => {
     const newPassword = event.target.value;
     setPassword(newPassword);
     if (!newPassword) {
@@ -60,9 +61,7 @@ const AddUser: React.FC = () => {
     }
   };
 
-  const onChangeConfirmPassword = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const onChangeConfirmPassword = (event: ChangeEvent<HTMLInputElement>) => {
     const newConfirmPassword = event.target.value;
     setConfirmPassword(newConfirmPassword);
     if (!newConfirmPassword) {
@@ -71,6 +70,15 @@ const AddUser: React.FC = () => {
       setConfirmPasswordError("Passwords do not match");
     } else {
       setConfirmPasswordError("");
+    }
+  };
+
+  const onChangeFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const selectedFile = files[0];
+      setImage(selectedFile);
+      console.log(selectedFile);
     }
   };
 
@@ -107,14 +115,27 @@ const AddUser: React.FC = () => {
       setConfirmPasswordError("");
     }
 
+    const formData = new FormData();
+    formData.append("userName", name);
+    formData.append("userEmail", email);
+    formData.append("userMobile", mobile);
+    formData.append("userPassword", password);
+    if (image) {
+      formData.append("userImage", image);
+    }
+
     axios
-      .post(`${baseUrl}/post`, {
-        // Use baseUrl with "/post"
-        userName: name,
-        userEmail: email,
-        userMobile: mobile,
-        userPassword: password,
-      })
+      .post(
+        `${baseUrl}/post`,
+        formData
+        //   {
+        //   userName: name,
+        //   userEmail: email,
+        //   userMobile: mobile,
+        //   userPassword: password,
+        //   userImage: image,
+        // }
+      )
       .then((res) => {
         console.log("User added:", res.data);
         navigate("/", { replace: true });
@@ -209,6 +230,12 @@ const AddUser: React.FC = () => {
             {confirmPasswordError}
           </span>
         )}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={onChangeFile}
+          style={{ marginTop: "10px" }}
+        />
         <Box
           sx={{
             display: "flex",
