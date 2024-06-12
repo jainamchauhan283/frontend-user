@@ -1,5 +1,5 @@
 import { Box, Button, Card, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -9,20 +9,58 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [error, setError] = useState("");
 
+  const onChangeEmail = (event: ChangeEvent<HTMLInputElement>) => {
+    const newEmail = event.target.value;
+    setEmail(newEmail);
+    if (!newEmail) {
+      setEmailError("Please enter an email address");
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(newEmail)) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  };
+
+  const onChangePassword = (event: ChangeEvent<HTMLInputElement>) => {
+    const newPassword = event.target.value;
+    setPassword(newPassword);
+    if (!newPassword) {
+      setPasswordError("Please enter a password");
+    } else {
+      setPasswordError("");
+    }
+  };
+
   const handleLogin = async () => {
-    try {
-      const response = await axios.post(`${baseUrl}/login`, {
-        userEmail: email,
-        userPassword: password,
-      });
-      const data = response.data;
-      console.log(data);
-      navigate("/", { replace: true });
-    } catch (error) {
-      setError("Invalid credentials");
-      console.error(error);
+    if (!email) {
+      setEmailError("Please enter an email");
+    } else {
+      setEmailError("");
+    }
+
+    if (!password) {
+      setPasswordError("Please enter a password");
+    } else {
+      setPasswordError("");
+    }
+
+    if (email && password) {
+      try {
+        const response = await axios.post(`${baseUrl}/login`, {
+          userEmail: email,
+          userPassword: password,
+        });
+        const data = response.data;
+        console.log(data);
+        navigate("/", { replace: true });
+      } catch (error) {
+        setError("Invalid credentials");
+        console.error(error);
+      }
     }
   };
 
@@ -54,16 +92,26 @@ const LoginPage: React.FC = () => {
           fullWidth
           margin="normal"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={onChangeEmail}
         />
+        {emailError && (
+          <Typography variant="body2" color="error" gutterBottom>
+            {emailError}
+          </Typography>
+        )}
         <TextField
           label="Password"
           type="password"
           fullWidth
           margin="normal"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={onChangePassword}
         />
+        {passwordError && (
+          <Typography variant="body2" color="error" gutterBottom>
+            {passwordError}
+          </Typography>
+        )}
         <Typography variant="body2" color="error">
           {error}
         </Typography>

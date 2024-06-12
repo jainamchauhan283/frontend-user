@@ -82,11 +82,16 @@ const HomePage: React.FC = () => {
     setDeleteUserId("");
   };
 
+  const handleLogout = () => {
+    navigate("/loginPage", { replace: true });
+  };
+
   return (
     <>
       <AppBar position="static" color="inherit">
         <Toolbar>
           <Typography variant="h5">All Users</Typography>
+          <Button onClick={handleLogout}>Logout</Button>
         </Toolbar>
       </AppBar>
       <Box sx={{ m: 3 }}>
