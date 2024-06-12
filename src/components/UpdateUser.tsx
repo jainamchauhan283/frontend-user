@@ -12,7 +12,10 @@ const UpdateUser: React.FC = () => {
     userName: "",
     userEmail: "",
     userMobile: "",
+    userImage: "",
   });
+
+  const [image, setImage] = useState<File | null>(null);
 
   useEffect(() => {
     if (location.state && location.state.user) {
@@ -25,10 +28,17 @@ const UpdateUser: React.FC = () => {
   };
 
   const handleUpdate = () => {
+    const formData = new FormData();
+    formData.append("userName", user.userName);
+    formData.append("userEmail", user.userEmail);
+    formData.append("userMobile", user.userMobile);
+    if (image) {
+      formData.append("userImage", image);
+    }
     // Perform update logic here
     // For demonstration, let's assume we're updating the user with an API call
     axios
-      .patch(`http://localhost:5000/userData/patch/${user._id}`, user)
+      .patch(`http://localhost:5000/userData/patch/${user._id}`, formData)
       .then((res) => {
         console.log("User updated:", res.data);
         navigate("/", { replace: true });
@@ -44,6 +54,14 @@ const UpdateUser: React.FC = () => {
       ...user,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const selectedFile = files[0];
+      setImage(selectedFile);
+    }
   };
 
   return (
@@ -96,6 +114,22 @@ const UpdateUser: React.FC = () => {
           name="userMobile"
           value={user.userMobile}
           onChange={handleChange}
+        />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          style={{ marginTop: "10px" }}
+        />
+        <img
+          src={`http://localhost:5000/files/${user.userImage}`}
+          alt={`${user.userName}'s profile`}
+          style={{
+            maxWidth: "100%",
+            maxHeight: "150px",
+            objectFit: "cover",
+            marginTop: "10px",
+          }}
         />
         <Box
           sx={{
