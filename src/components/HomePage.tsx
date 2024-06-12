@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const baseUrl = "http://localhost:5000/userData"; // BASEURL
 
@@ -26,6 +26,7 @@ interface User {
   userName: string;
   userEmail: string;
   userMobile: string;
+  userImage: string;
 }
 
 const HomePage: React.FC = () => {
@@ -104,7 +105,20 @@ const HomePage: React.FC = () => {
               >
                 <Card>
                   <CardContent>
-                    <Typography variant="h6" align="center">{user.userName}</Typography>
+                    {/* {user.userImage && ( */}
+                    <img
+                      src={`http://localhost:5000/files/${user.userImage}`}
+                      alt={`${user.userName}'s profile`}
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "150px",
+                        objectFit: "cover",
+                      }}
+                    />
+                    {/* )} */}
+                    <Typography variant="h6" align="center">
+                      {user.userName}
+                    </Typography>
                     <Typography variant="body1" color="text.secondary">
                       <strong>Email :</strong> {user.userEmail}
                     </Typography>

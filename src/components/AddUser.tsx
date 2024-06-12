@@ -32,7 +32,9 @@ const AddUser: React.FC = () => {
     const newEmail = event.target.value;
     setEmail(newEmail);
     if (!newEmail) {
-      setEmailError("Please enter an email");
+      setEmailError("Please enter an email address");
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(newEmail)) {
+      setEmailError("Please enter a valid email address");
     } else {
       setEmailError("");
     }
@@ -119,11 +121,6 @@ const AddUser: React.FC = () => {
       })
       .catch((error) => {
         console.error("Error adding data", error);
-        if (error.response) {
-          setEmailError(error.response.data.error);
-        } else {
-          // Handle other errors or display a generic error message
-        }
       });
   };
 
