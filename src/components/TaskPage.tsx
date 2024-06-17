@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Card,
+  CircularProgress,
   TextField,
   Toolbar,
   Typography,
@@ -18,13 +19,40 @@ const TaskPage: React.FC = () => {
   const [taskName, setTaskName] = useState("");
   const [error, setError] = useState("");
   const [userName, setUserName] = useState("");
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const userName = localStorage.getItem("userName");
     if (userName) {
       setUserName(userName);
+      fetchUserTasks(); // Fetch tasks when component mounts
     }
   }, []);
+
+  const fetchUserTasks = async () => {
+    try {
+      setLoading(true);
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        setError("Access token not found");
+        return;
+      }
+
+      const response = await axios.get(`${baseUrl}/api/get/tasks`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const data = response.data;
+      setTasks(data);
+      setLoading(false);
+    } catch (error) {
+      setError("Failed to fetch tasks");
+      console.error(error);
+      setLoading(false);
+    }
+  };
 
   const handleAddTask = async () => {
     try {
@@ -48,6 +76,9 @@ const TaskPage: React.FC = () => {
 
       // Clear the task input field
       setTaskName("");
+
+      // Update tasks state to reflect new task addition
+      setTasks([...tasks, data.task]);
     } catch (error) {
       setError("Failed to add task");
       console.error(error);
@@ -146,6 +177,20 @@ const TaskPage: React.FC = () => {
         <Typography variant="body2" color="error">
           {error}
         </Typography>
+
+        {loading ? (
+          <CircularProgress sx={{ mt: 3 }} />
+        ) : (
+          tasks.map((task) => (
+            <Card
+              key={task._id}
+              variant="outlined"
+              sx={{ mt: 1, p: 1, width: "100%" }}
+            >
+              <Typography variant="h6">{task.taskName}</Typography>
+            </Card>
+          ))
+        )}
       </Box>
     </>
   );
