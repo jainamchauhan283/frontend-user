@@ -56,7 +56,16 @@ const LoginPage: React.FC = () => {
         });
         const data = response.data;
         console.log(data);
-        navigate("/", { replace: true });
+
+        // Store the token in localStorage
+        localStorage.setItem("accessToken", data.accessToken);
+        console.log("Access Token:", data.accessToken);
+        localStorage.setItem("userName", data.userName);
+
+        navigate(
+          "/taskpage"
+          , { replace: true }
+        );
       } catch (error) {
         setError("Invalid credentials");
         console.error(error);

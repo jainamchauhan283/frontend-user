@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AddUser from "./components/AddUser";
 import UpdateUser from "./components/UpdateUser";
 import LoginPage from "./components/LoginPage";
+import TaskPage from "./components/TaskPage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/addUser" element={<AddUser />} />
         <Route path="/updateUser" element={<UpdateUser />} />
         <Route path="/loginPage" element={<LoginPage />} />
+        <Route path="/taskpage" element={<TaskPage />} />
       </Routes>
     </BrowserRouter>
   );
