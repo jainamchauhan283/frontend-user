@@ -10,6 +10,7 @@ import {
   IconButton,
   InputBase,
   Paper,
+  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -83,7 +84,23 @@ const TaskPage: React.FC = () => {
       console.error(error);
     }
   };
-  
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await axios.delete(`${baseUrl}/api/delete/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      // Remove the deleted task from the tasks array
+      const updatedTasks = tasks.filter((task) => task._id !== taskId);
+      setTasks(updatedTasks);
+    } catch (error) {
+      setError("Failed to delete task");
+      console.error(error);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -226,7 +243,12 @@ const TaskPage: React.FC = () => {
                 {task.taskName}{" "}
                 <ButtonGroup variant="text" aria-label="Basic button group">
                   <Button>Edit</Button>
-                  <Button>Delete</Button>
+                  <Button
+                    onClick={() => handleDeleteTask(task._id)}
+                    color="error"
+                  >
+                    Delete
+                  </Button>
                 </ButtonGroup>
               </Typography>
             </Card>
