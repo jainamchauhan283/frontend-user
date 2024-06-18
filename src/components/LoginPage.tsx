@@ -1,9 +1,20 @@
-import { Box, Button, Card, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { ChangeEvent, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setFormData } from "../redux/formSlice";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const baseUrl = "http://localhost:5000/users";
 
@@ -15,6 +26,14 @@ const LoginPage: React.FC = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
 
   const onChangeEmail = (event: ChangeEvent<HTMLInputElement>) => {
     const newEmail = event.target.value;
@@ -39,26 +58,21 @@ const LoginPage: React.FC = () => {
   };
 
   const handleLogin = async () => {
-    if (!email) {
-      setEmailError("Please enter an email");
-    } else {
-      setEmailError("");
+    if (!email || !password) {
+      setEmailError(!email ? "Please enter an email" : "");
+      setPasswordError(!password ? "Please enter a password" : "");
+      return;
     }
 
-    if (!password) {
-      setPasswordError("Please enter a password");
-    } else {
-      setPasswordError("");
-    }
+    try {
+      const response = await axios.post(`${baseUrl}/login`, {
+        userEmail: email,
+        userPassword: password,
+      });
 
-    if (email && password) {
-      try {
-        const response = await axios.post(`${baseUrl}/login`, {
-          userEmail: email,
-          userPassword: password,
-        });
-        const data = response.data;
+      const { data } = response;
 
+      if (data && data.user) {
         // Dispatch form data to Redux
         dispatch(
           setFormData({
@@ -67,11 +81,26 @@ const LoginPage: React.FC = () => {
             accessToken: data.accessToken,
           })
         );
-
-        // Navigate to TaskPage
-        navigate("/task", { replace: true });
-      } catch (error) {
+        // Show success toast
+        toast.success("Login successful", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+        setTimeout(() => {
+          // Navigate to TaskPage
+          navigate("/task", { replace: true });
+        }, 1000);
+      }
+    } catch (error: any) {
+      // Handle error response
+      if (error.response && error.response.data) {
         setError("Invalid credentials");
+        toast.error(error.response.data.error, {
+          position: "top-right",
+          autoClose: 2000,
+        });
+      } else {
+        setError("Something went wrong. Please try again.");
         console.error(error);
       }
     }
@@ -90,6 +119,7 @@ const LoginPage: React.FC = () => {
         alignItems: "center",
       }}
     >
+      {/* <ToastContainer /> */}
       <Card
         variant="outlined"
         sx={{
@@ -100,7 +130,7 @@ const LoginPage: React.FC = () => {
         }}
       >
         <Typography variant="h4" align="center" gutterBottom>
-          Login 
+          Login
         </Typography>
         <TextField
           label="Email"
@@ -118,20 +148,34 @@ const LoginPage: React.FC = () => {
         )}
         <TextField
           label="Password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           fullWidth
           margin="normal"
           value={password}
           onChange={onChangePassword}
+          InputProps={{
+            // Use InputProps to include endAdornment
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         {passwordError && (
           <Typography variant="body2" color="error" gutterBottom>
             {passwordError}
           </Typography>
         )}
-        <Typography variant="body2" color="error">
+        {/* <Typography variant="body2" color="error">
           {error}
-        </Typography>
+        </Typography> */}
         <Button
           variant="contained"
           fullWidth
@@ -146,6 +190,7 @@ const LoginPage: React.FC = () => {
           <Button onClick={handleRegister}>Register</Button>
         </Box>
       </Card>
+      <ToastContainer />
     </Box>
   );
 };
