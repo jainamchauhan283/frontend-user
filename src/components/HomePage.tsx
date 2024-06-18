@@ -49,7 +49,7 @@ const HomePage: React.FC = () => {
   }, []);
 
   const handleAddUser = () => {
-    navigate("/addUser", { replace: true });
+    navigate("/register", { replace: true });
   };
 
   const handleEdit = (user: User) => {
@@ -83,7 +83,7 @@ const HomePage: React.FC = () => {
   };
 
   const handleLogout = () => {
-    navigate("/loginPage", { replace: true });
+    navigate("/login", { replace: true });
   };
 
   return (

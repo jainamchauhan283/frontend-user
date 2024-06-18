@@ -6,9 +6,9 @@ const Main = () => {
   const accessToken = useSelector((state: any) => state.form.accessToken);
   debugger
   if (accessToken) {
-    return <Navigate to="/taskpage" replace />;
+    return <Navigate to="/task" replace />;
   } else {
-    return <Navigate to="/loginPage" replace />;
+    return <Navigate to="/login" replace />;
   }
 };
 

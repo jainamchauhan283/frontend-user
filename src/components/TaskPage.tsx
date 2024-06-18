@@ -39,7 +39,7 @@ const TaskPage: React.FC = () => {
 
   useEffect(() => {
     if (!accessToken) {
-      navigate("/loginPage", { replace: true });
+      navigate("/login", { replace: true });
     } else {
       fetchUserTasks();
     }
@@ -161,7 +161,7 @@ const TaskPage: React.FC = () => {
       dispatch(clearFormData());
 
       // Navigate to login page
-      navigate("/loginPage", { replace: true });
+      navigate("/login", { replace: true });
     } catch (error) {
       setError("Failed to logout");
       console.error(error);

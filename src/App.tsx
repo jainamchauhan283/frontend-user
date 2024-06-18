@@ -15,10 +15,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route index path="/home" element={<HomePage />} />
-        <Route path="/addUser" element={<AddUser />} />
+        <Route path="/register" element={<AddUser />} />
         <Route path="/updateUser" element={<UpdateUser />} />
-        <Route path="/loginPage" element={<LoginPage />} />
-        <Route path="/taskpage" element={<TaskPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/task" element={<TaskPage />} />
         <Route path="/" element={<Main />} />
       </Routes>
     </BrowserRouter>

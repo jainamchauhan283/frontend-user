@@ -1,4 +1,3 @@
-// LoginPage.tsx
 import { Box, Button, Card, TextField, Typography } from "@mui/material";
 import { ChangeEvent, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -70,12 +69,16 @@ const LoginPage: React.FC = () => {
         );
 
         // Navigate to TaskPage
-        navigate("/taskpage", { replace: true });
+        navigate("/task", { replace: true });
       } catch (error) {
         setError("Invalid credentials");
         console.error(error);
       }
     }
+  };
+
+  const handleRegister = () => {
+    navigate("/register", { replace: true });
   };
 
   return (
@@ -97,7 +100,7 @@ const LoginPage: React.FC = () => {
         }}
       >
         <Typography variant="h4" align="center" gutterBottom>
-          Login User
+          Login 
         </Typography>
         <TextField
           label="Email"
@@ -138,6 +141,10 @@ const LoginPage: React.FC = () => {
         >
           Login
         </Button>
+        <Box mt={1}>
+          <span>Don't have an account? </span>
+          <Button onClick={handleRegister}>Register</Button>
+        </Box>
       </Card>
     </Box>
   );

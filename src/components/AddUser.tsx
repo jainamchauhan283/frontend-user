@@ -3,7 +3,7 @@ import { Box, Card, TextField, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const baseUrl = "http://localhost:5000/userData"; // Base URL declaration
+const baseUrl = "http://localhost:5000/users"; // Base URL declaration
 
 const AddUser: React.FC = () => {
   const navigate = useNavigate();
@@ -138,15 +138,20 @@ const AddUser: React.FC = () => {
       )
       .then((res) => {
         console.log("User added:", res.data);
-        navigate("/", { replace: true });
+        // navigate("/", { replace: true });
+        navigate("/login", { replace: true });
       })
       .catch((error) => {
         console.error("Error adding data", error);
       });
   };
 
-  const handleCancel = () => {
-    navigate("/", { replace: true });
+  // const handleCancel = () => {
+  //   navigate("/", { replace: true });
+  // };
+
+  const handleLogin = () => {
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -168,7 +173,7 @@ const AddUser: React.FC = () => {
         }}
       >
         <Typography variant="h4" align="center">
-          Add User
+          Register
         </Typography>
         <TextField
           label="Username"
@@ -236,7 +241,7 @@ const AddUser: React.FC = () => {
           onChange={onChangeFile}
           style={{ marginTop: "10px" }}
         />
-        <Box
+        {/* <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
@@ -261,6 +266,21 @@ const AddUser: React.FC = () => {
           >
             Add
           </Button>
+        </Box> */}
+        <Button
+          sx={{
+            mt: 2,
+          }}
+          variant="contained"
+          fullWidth
+          color="primary"
+          onClick={handleAddUser}
+        >
+          Register
+        </Button>
+        <Box mt={1}>
+          <span>Already have an account? </span>
+          <Button onClick={handleLogin}>Login</Button>
         </Box>
       </Card>
     </Box>
