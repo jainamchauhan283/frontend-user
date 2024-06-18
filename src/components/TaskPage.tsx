@@ -1,43 +1,49 @@
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Box,
   Button,
+  ButtonGroup,
   Card,
   CircularProgress,
-  TextField,
+  Divider,
+  IconButton,
+  InputBase,
+  Paper,
   Toolbar,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { clearFormData } from "../redux/formSlice";
+import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
 
 const baseUrl = "http://localhost:5000";
 
 const TaskPage: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const accessToken = useSelector((state: any) => state.form.accessToken);
+  const userName = useSelector((state: any) => state.form.username);
+
   const [taskName, setTaskName] = useState("");
   const [error, setError] = useState("");
-  const [userName, setUserName] = useState("");
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const userName = localStorage.getItem("userName");
-    if (userName) {
-      setUserName(userName);
-      fetchUserTasks(); // Fetch tasks when component mounts
+    if (!accessToken) {
+      navigate("/loginPage", { replace: true });
+    } else {
+      fetchUserTasks();
     }
-  }, []);
+  }, [accessToken, navigate]);
 
   const fetchUserTasks = async () => {
     try {
       setLoading(true);
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) {
-        setError("Access token not found");
-        return;
-      }
 
       const response = await axios.get(`${baseUrl}/api/get/tasks`, {
         headers: {
@@ -56,12 +62,6 @@ const TaskPage: React.FC = () => {
 
   const handleAddTask = async () => {
     try {
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) {
-        setError("Access token not found");
-        return;
-      }
-
       const response = await axios.post(
         `${baseUrl}/api/post/tasks`,
         { taskName },
@@ -72,7 +72,6 @@ const TaskPage: React.FC = () => {
         }
       );
       const data = response.data;
-      console.log(data);
 
       // Clear the task input field
       setTaskName("");
@@ -84,17 +83,12 @@ const TaskPage: React.FC = () => {
       console.error(error);
     }
   };
+  
 
   const handleLogout = async () => {
     try {
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) {
-        setError("Access token not found");
-        return;
-      }
-
       await axios.post(
-        `${baseUrl}/userData/logout`,
+        `${baseUrl}/users/logout`,
         {},
         {
           headers: {
@@ -103,12 +97,11 @@ const TaskPage: React.FC = () => {
         }
       );
 
-      // Clear local storage items
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("userName");
+      // Clear Redux form data
+      dispatch(clearFormData());
 
+      // Navigate to login page
       navigate("/loginPage", { replace: true });
-      console.log("Logout successful");
     } catch (error) {
       setError("Failed to logout");
       console.error(error);
@@ -131,7 +124,41 @@ const TaskPage: React.FC = () => {
           alignItems: "center",
         }}
       >
-        <Box
+        <Paper
+          component="form"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+            p: 1,
+          }}
+        >
+          <InputBase
+            sx={{ ml: 1, flex: 1 }}
+            placeholder="Task"
+            inputProps={{ "aria-label": "Task" }}
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+          />
+          <IconButton
+            type="button"
+            sx={{ p: "10px" }}
+            onClick={() => setTaskName("")}
+            aria-label="cancel"
+          >
+            <CloseIcon />
+          </IconButton>
+          <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+          <IconButton
+            color="primary"
+            sx={{ p: "10px" }}
+            onClick={handleAddTask}
+            aria-label="add-task"
+          >
+            <AddIcon />
+          </IconButton>
+        </Paper>
+        {/* <Box
           sx={{
             display: "flex",
             flexDirection: "row",
@@ -160,6 +187,7 @@ const TaskPage: React.FC = () => {
               fullWidth
               sx={{ width: "calc(50% - 8px)" }}
               color="error"
+              onClick={() => setTaskName("")} // Clear input on Cancel
             >
               Cancel
             </Button>
@@ -173,8 +201,8 @@ const TaskPage: React.FC = () => {
               Add
             </Button>
           </Box>
-        </Box>
-        <Typography variant="body2" color="error">
+        </Box> */}
+        <Typography variant="body2" color="error" sx={{ mt: 1 }}>
           {error}
         </Typography>
 
@@ -185,9 +213,22 @@ const TaskPage: React.FC = () => {
             <Card
               key={task._id}
               variant="outlined"
-              sx={{ mt: 1, p: 1, width: "100%" }}
+              // sx={{ mt: 1, p: 1, width: "100%" }}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                p: 1,
+                m: 1,
+              }}
             >
-              <Typography variant="h6">{task.taskName}</Typography>
+              <Typography variant="h6" sx={{ ml: 1, flex: 1 }}>
+                {task.taskName}{" "}
+                <ButtonGroup variant="text" aria-label="Basic button group">
+                  <Button>Edit</Button>
+                  <Button>Delete</Button>
+                </ButtonGroup>
+              </Typography>
             </Card>
           ))
         )}

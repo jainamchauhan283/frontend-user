@@ -1,12 +1,16 @@
+// LoginPage.tsx
 import { Box, Button, Card, TextField, Typography } from "@mui/material";
 import { ChangeEvent, useState } from "react";
+import { useDispatch } from "react-redux";
+import { setFormData } from "../redux/formSlice";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const baseUrl = "http://localhost:5000/userData"; // Base URL declaration
+const baseUrl = "http://localhost:5000/users";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -55,17 +59,18 @@ const LoginPage: React.FC = () => {
           userPassword: password,
         });
         const data = response.data;
-        console.log(data);
 
-        // Store the token in localStorage
-        localStorage.setItem("accessToken", data.accessToken);
-        console.log("Access Token:", data.accessToken);
-        localStorage.setItem("userName", data.userName);
-
-        navigate(
-          "/taskpage"
-          , { replace: true }
+        // Dispatch form data to Redux
+        dispatch(
+          setFormData({
+            username: data.user.userName,
+            email: data.user.userEmail,
+            accessToken: data.accessToken,
+          })
         );
+
+        // Navigate to TaskPage
+        navigate("/taskpage", { replace: true });
       } catch (error) {
         setError("Invalid credentials");
         console.error(error);

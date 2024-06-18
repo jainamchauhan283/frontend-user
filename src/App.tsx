@@ -5,18 +5,24 @@ import AddUser from "./components/AddUser";
 import UpdateUser from "./components/UpdateUser";
 import LoginPage from "./components/LoginPage";
 import TaskPage from "./components/TaskPage";
+import Main from "./components/Main";
+import { Provider} from "react-redux";
+import { store } from "./redux/store";
 
 function App() {
   return (
+    <Provider store={store}>
     <BrowserRouter>
       <Routes>
-        <Route index path="/" element={<HomePage />} />
+        <Route index path="/home" element={<HomePage />} />
         <Route path="/addUser" element={<AddUser />} />
         <Route path="/updateUser" element={<UpdateUser />} />
         <Route path="/loginPage" element={<LoginPage />} />
         <Route path="/taskpage" element={<TaskPage />} />
+        <Route path="/" element={<Main />} />
       </Routes>
     </BrowserRouter>
+    </Provider>
   );
 }
 
