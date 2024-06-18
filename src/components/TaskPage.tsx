@@ -10,7 +10,6 @@ import {
   IconButton,
   InputBase,
   Paper,
-  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -20,6 +19,7 @@ import axios from "axios";
 import { clearFormData } from "../redux/formSlice";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
+import DoneIcon from "@mui/icons-material/Done";
 
 const baseUrl = "http://localhost:5000";
 
@@ -33,6 +33,9 @@ const TaskPage: React.FC = () => {
   const [error, setError] = useState("");
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false); // State to manage edit mode
+  const [editTaskId, setEditTaskId] = useState(""); // State to store task ID being edited
+  const [originalTaskName, setOriginalTaskName] = useState(""); // State to store original task name for cancel
 
   useEffect(() => {
     if (!accessToken) {
@@ -83,6 +86,46 @@ const TaskPage: React.FC = () => {
       setError("Failed to add task");
       console.error(error);
     }
+  };
+
+  const handleEditClick = (taskId: string, currentTaskName: string) => {
+    setEditTaskId(taskId); // Set the task ID being edited
+    setTaskName(currentTaskName); // Set the current task name in the input field
+    setEditMode(true); // Enable edit mode
+  };
+
+  const handleDoneEdit = async () => {
+    try {
+      // Make PATCH request to update the task
+      await axios.patch(
+        `${baseUrl}/api/update/${editTaskId}`,
+        { taskName },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      // Clear the input field and reset state
+      setTaskName("");
+      setEditTaskId("");
+      setEditMode(false);
+
+      // Refetch tasks to update the list
+      fetchUserTasks();
+    } catch (error) {
+      setError("Failed to update task");
+      console.error(error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    // Reset task name to original and disable edit mode
+    setTaskName(originalTaskName);
+    setEditTaskId("");
+    setOriginalTaskName("");
+    setEditMode(false);
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -160,20 +203,37 @@ const TaskPage: React.FC = () => {
           <IconButton
             type="button"
             sx={{ p: "10px" }}
-            onClick={() => setTaskName("")}
+            onClick={() => {
+              if (editMode) {
+                handleCancelEdit();
+              } else {
+                setTaskName("");
+              }
+            }}
             aria-label="cancel"
           >
             <CloseIcon />
           </IconButton>
           <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-          <IconButton
-            color="primary"
-            sx={{ p: "10px" }}
-            onClick={handleAddTask}
-            aria-label="add-task"
-          >
-            <AddIcon />
-          </IconButton>
+          {editMode ? (
+            <IconButton
+              color="primary"
+              sx={{ p: "10px" }}
+              onClick={handleDoneEdit}
+              aria-label="done-edit"
+            >
+              <DoneIcon />
+            </IconButton>
+          ) : (
+            <IconButton
+              color="primary"
+              sx={{ p: "10px" }}
+              onClick={handleAddTask}
+              aria-label="add-task"
+            >
+              <AddIcon />
+            </IconButton>
+          )}
         </Paper>
         {/* <Box
           sx={{
@@ -240,9 +300,25 @@ const TaskPage: React.FC = () => {
               }}
             >
               <Typography variant="h6" sx={{ ml: 1, flex: 1 }}>
-                {task.taskName}{" "}
+                {task._id === editTaskId ? (
+                  <InputBase
+                    value={taskName}
+                    onChange={(e) => setTaskName(e.target.value)}
+                    autoFocus
+                  />
+                ) : (
+                  task.taskName
+                )}
                 <ButtonGroup variant="text" aria-label="Basic button group">
-                  <Button>Edit</Button>
+                  {editMode && task._id === editTaskId ? (
+                    <></>
+                  ) : (
+                    <Button
+                      onClick={() => handleEditClick(task._id, task.taskName)}
+                    >
+                      Edit
+                    </Button>
+                  )}
                   <Button
                     onClick={() => handleDeleteTask(task._id)}
                     color="error"
