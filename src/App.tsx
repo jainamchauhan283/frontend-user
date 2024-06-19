@@ -8,6 +8,7 @@ import TaskPage from "./components/TaskPage";
 import Main from "./components/Main";
 import { Provider} from "react-redux";
 import { store } from "./redux/store";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/" element={<Main />} />
       </Routes>
     </BrowserRouter>
+    <Toaster position="top-right" />
     </Provider>
   );
 }

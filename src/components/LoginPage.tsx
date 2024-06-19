@@ -14,7 +14,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 const baseUrl = "http://localhost:5000/users";
 
@@ -82,7 +82,7 @@ const LoginPage: React.FC = () => {
           })
         );
         // Show success toast
-        toast.success("Login successful", { duration: 2000 });
+        toast.success("Login successful", { duration: 1500 });
         setTimeout(() => {
           // Navigate to TaskPage
           navigate("/task", { replace: true });
@@ -183,7 +183,6 @@ const LoginPage: React.FC = () => {
           <Button onClick={handleRegister}>Register</Button>
         </Box>
       </Card>
-      <Toaster position="top-right" />
     </Box>
   );
 };

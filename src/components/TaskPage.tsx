@@ -20,8 +20,7 @@ import { clearFormData } from "../redux/formSlice";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DoneIcon from "@mui/icons-material/Done";
-// import { ToastContainer } from "react-toastify";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 const baseUrl = "http://localhost:5000";
 
@@ -57,16 +56,23 @@ const TaskPage: React.FC = () => {
       });
       const data = response.data;
       setTasks(data);
-      setLoading(false);
     } catch (error) {
       setError("Failed to fetch tasks");
       console.error(error);
+      toast.error("Failed to fetch task", { duration: 2000 }); // Show error toast
+    } finally {
       setLoading(false);
     }
   };
 
   const handleAddTask = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    // Check if taskName is empty
+    if (taskName.trim() === "") {
+      setError("Please Enter a Task");
+      return;
+    }
+    setError(""); // Clear any existing error message
     try {
       setLoading(true);
       const response = await axios.post(
@@ -79,24 +85,19 @@ const TaskPage: React.FC = () => {
         }
       );
       const data = response.data;
-
       // Check if data contains a task object
       if (data && data.task) {
-        // Clear the task input field
-        setTaskName("");
+        setTaskName(""); // Clear the task input field
 
-        // Update tasks state to reflect new task addition
-        setTasks([...tasks, data.task]);
-
-        // Show success toast
+        setTasks([...tasks, data.task]); // Update tasks state to reflect new task add
         toast.success("Task added successfully", { duration: 2000 });
       }
     } catch (error) {
-      setError("Please enter a Task");
+      setError("Failed to add task");
       console.error(error);
+      toast.error("Failed to add task", { duration: 2000 }); // Show error toast
     } finally {
-      // Reset loading state
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   };
 
@@ -108,6 +109,7 @@ const TaskPage: React.FC = () => {
 
   const handleDoneEdit = async () => {
     try {
+      setLoading(true);
       // Make PATCH request to update the task
       await axios.patch(
         `${baseUrl}/api/update/${editTaskId}`,
@@ -118,17 +120,19 @@ const TaskPage: React.FC = () => {
           },
         }
       );
-
       // Clear the input field and reset state
       setTaskName("");
       setEditTaskId("");
       setEditMode(false);
 
-      // Refetch tasks to update the list
-      fetchUserTasks();
+      fetchUserTasks(); // Refetch tasks to update the list
+      toast.success("Task Update successfully");
     } catch (error) {
       setError("Failed to update task");
       console.error(error);
+      toast.error("Failed to Update successfully"); // Show error toast
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -140,25 +144,29 @@ const TaskPage: React.FC = () => {
 
   const handleDeleteTask = async (taskId: string) => {
     try {
+      setLoading(true);
       await axios.delete(`${baseUrl}/api/delete/${taskId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-
       // Remove the deleted task from the tasks array
       const updatedTasks = tasks.filter((task) => task._id !== taskId);
       setTasks(updatedTasks);
-      // Show delete toast
-      toast.success("Delete successful", { duration: 2000 });
+
+      toast.success("Delete successful", { duration: 2000 }); // Show delete toast
     } catch (error) {
-      setError("Failed to delete task");
+      // setError("Failed to delete task");
       console.error(error);
+      toast.error("Failed to delete task"); // show error toast
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogout = async () => {
     try {
+      setLoading(true);
       await axios.post(
         `${baseUrl}/users/logout`,
         {},
@@ -169,14 +177,17 @@ const TaskPage: React.FC = () => {
         }
       );
 
-      // Clear Redux form data
-      dispatch(clearFormData());
-
-      // Navigate to login page
-      navigate("/login", { replace: true });
+      dispatch(clearFormData()); // Clear Redux form data
+      setTimeout(() => {
+        toast.success("Logout successful"); // show logout toast msg
+      }, 1000);
+      navigate("/login", { replace: true }); // Navigate to login page
     } catch (error) {
-      setError("Failed to logout");
+      // setError("Failed to logout");
       console.error(error);
+      toast.error("Something went wrong"); // show error toast
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -196,7 +207,6 @@ const TaskPage: React.FC = () => {
           alignItems: "center",
         }}
       >
-        <Toaster position="top-right" />
         <Paper
           component="form"
           sx={{
@@ -292,7 +302,7 @@ const TaskPage: React.FC = () => {
             </Button>
           </Box>
         </Box> */}
-        <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+        <Typography variant="body1" color="error" sx={{ mt: 1 }}>
           {error}
         </Typography>
 
@@ -341,7 +351,6 @@ const TaskPage: React.FC = () => {
                   Delete
                 </Button>
               </ButtonGroup>
-              {/* </Typography> */}
             </Card>
           ))
         )}
