@@ -13,8 +13,8 @@ import { setFormData } from "../redux/formSlice";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer, toast } from "react-toastify";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Toaster, toast } from "react-hot-toast";
 
 const baseUrl = "http://localhost:5000/users";
 
@@ -82,10 +82,7 @@ const LoginPage: React.FC = () => {
           })
         );
         // Show success toast
-        toast.success("Login successful", {
-          position: "top-right",
-          autoClose: 2000,
-        });
+        toast.success("Login successful", { duration: 2000 });
         setTimeout(() => {
           // Navigate to TaskPage
           navigate("/task", { replace: true });
@@ -95,10 +92,7 @@ const LoginPage: React.FC = () => {
       // Handle error response
       if (error.response && error.response.data) {
         setError("Invalid credentials");
-        toast.error(error.response.data.error, {
-          position: "top-right",
-          autoClose: 2000,
-        });
+        toast.error(error.response.data.error, { duration: 2000 });
       } else {
         setError("Something went wrong. Please try again.");
         console.error(error);
@@ -119,7 +113,6 @@ const LoginPage: React.FC = () => {
         alignItems: "center",
       }}
     >
-      {/* <ToastContainer /> */}
       <Card
         variant="outlined"
         sx={{
@@ -190,7 +183,7 @@ const LoginPage: React.FC = () => {
           <Button onClick={handleRegister}>Register</Button>
         </Box>
       </Card>
-      <ToastContainer />
+      <Toaster position="top-right" />
     </Box>
   );
 };
