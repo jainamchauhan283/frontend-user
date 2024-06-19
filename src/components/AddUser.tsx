@@ -1,7 +1,8 @@
 import React, { useState, ChangeEvent } from "react";
-import { Box, Card, TextField, Button, Typography } from "@mui/material";
+import { Box, Card, TextField, Button, Typography, Input } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 
 const baseUrl = "http://localhost:5000/users"; // Base URL declaration
 
@@ -18,6 +19,7 @@ const AddUser: React.FC = () => {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [image, setImage] = useState<File | null>(null);
+  const [imageError, setImageError] = useState("");
 
   const onChangeName = (event: ChangeEvent<HTMLInputElement>) => {
     const newName = event.target.value;
@@ -78,7 +80,7 @@ const AddUser: React.FC = () => {
     if (files && files.length > 0) {
       const selectedFile = files[0];
       setImage(selectedFile);
-      console.log(selectedFile);
+      setImageError("");
     }
   };
 
@@ -115,6 +117,12 @@ const AddUser: React.FC = () => {
       setConfirmPasswordError("");
     }
 
+    if (!image) {
+      setImageError("Please select an image");
+    } else {
+      setImageError("");
+    }
+
     const formData = new FormData();
     formData.append("userName", name);
     formData.append("userEmail", email);
@@ -139,10 +147,22 @@ const AddUser: React.FC = () => {
       .then((res) => {
         console.log("User added:", res.data);
         // navigate("/", { replace: true });
+        toast.success("registration successful", { duration: 1000 });
         navigate("/login", { replace: true });
       })
       .catch((error) => {
         console.error("Error adding data", error);
+        if (
+          error.response &&
+          error.response.data.error === "This Email already exists"
+        ) {
+          setEmailError("Email already exists"); // Set specific error message for email field
+        } else {
+          // Handle other errors or display a generic error message
+        }
+        toast.error("Something went wrong, please try again", {
+          duration: 1000,
+        });
       });
   };
 
@@ -180,7 +200,7 @@ const AddUser: React.FC = () => {
           type="text"
           autoComplete="userName"
           fullWidth
-          margin="normal"
+          margin="dense"
           value={name}
           onChange={onChangeName}
         />
@@ -192,7 +212,7 @@ const AddUser: React.FC = () => {
           type="email"
           autoComplete="email"
           fullWidth
-          margin="normal"
+          margin="dense"
           value={email}
           onChange={onChangeEmail}
         />
@@ -204,7 +224,7 @@ const AddUser: React.FC = () => {
           type="number"
           autoComplete="mobile"
           fullWidth
-          margin="normal"
+          margin="dense"
           value={mobile}
           onChange={onChangeMobile}
         />
@@ -215,7 +235,7 @@ const AddUser: React.FC = () => {
           label="Password"
           type="password"
           fullWidth
-          margin="normal"
+          margin="dense"
           value={password}
           onChange={onChangePassword}
         />
@@ -226,7 +246,7 @@ const AddUser: React.FC = () => {
           label="Confirm Password"
           type="password"
           fullWidth
-          margin="normal"
+          margin="dense"
           value={confirmPassword}
           onChange={onChangeConfirmPassword}
         />
@@ -235,12 +255,20 @@ const AddUser: React.FC = () => {
             {confirmPasswordError}
           </span>
         )}
-        <input
+        <Input
+          fullWidth
           type="file"
-          accept="image/*"
+          sx={{
+            my: 1,
+          }}
+          inputProps={{
+            accept: "image/*",
+          }}
           onChange={onChangeFile}
-          style={{ marginTop: "10px" }}
         />
+        {/* {imageError && ( */}
+        <span style={{ color: "red", marginTop: 4 }}>{imageError}</span>
+        {/* )} */}
         {/* <Box
           sx={{
             display: "flex",
