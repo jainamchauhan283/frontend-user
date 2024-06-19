@@ -20,7 +20,8 @@ import { clearFormData } from "../redux/formSlice";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DoneIcon from "@mui/icons-material/Done";
-import { ToastContainer } from "react-toastify";
+// import { ToastContainer } from "react-toastify";
+import { Toaster, toast } from "react-hot-toast";
 
 const baseUrl = "http://localhost:5000";
 
@@ -67,6 +68,7 @@ const TaskPage: React.FC = () => {
   const handleAddTask = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
+      setLoading(true);
       const response = await axios.post(
         `${baseUrl}/api/post/tasks`,
         { taskName },
@@ -78,14 +80,23 @@ const TaskPage: React.FC = () => {
       );
       const data = response.data;
 
-      // Clear the task input field
-      setTaskName("");
+      // Check if data contains a task object
+      if (data && data.task) {
+        // Clear the task input field
+        setTaskName("");
 
-      // Update tasks state to reflect new task addition
-      setTasks([...tasks, data.task]);
+        // Update tasks state to reflect new task addition
+        setTasks([...tasks, data.task]);
+
+        // Show success toast
+        toast.success("Task added successfully", { duration: 2000 });
+      }
     } catch (error) {
       setError("Please enter a Task");
       console.error(error);
+    } finally {
+      // Reset loading state
+      setLoading(false);
     }
   };
 
@@ -138,6 +149,8 @@ const TaskPage: React.FC = () => {
       // Remove the deleted task from the tasks array
       const updatedTasks = tasks.filter((task) => task._id !== taskId);
       setTasks(updatedTasks);
+      // Show delete toast
+      toast.success("Delete successful", { duration: 2000 });
     } catch (error) {
       setError("Failed to delete task");
       console.error(error);
@@ -183,7 +196,7 @@ const TaskPage: React.FC = () => {
           alignItems: "center",
         }}
       >
-        <ToastContainer />
+        <Toaster position="top-right" />
         <Paper
           component="form"
           sx={{
@@ -300,7 +313,7 @@ const TaskPage: React.FC = () => {
               }}
             >
               <Typography variant="h6" sx={{ ml: 1, flex: 1 }}>
-                {task._id === editTaskId ? (
+                {/* {task._id === editTaskId ? (
                   <InputBase
                     value={taskName}
                     onChange={(e) => setTaskName(e.target.value)}
@@ -308,7 +321,8 @@ const TaskPage: React.FC = () => {
                   />
                 ) : (
                   task.taskName
-                )}
+                )} */}
+                {task.taskName}
               </Typography>
               <ButtonGroup variant="text" aria-label="Basic button group">
                 {editMode && task._id === editTaskId ? (
