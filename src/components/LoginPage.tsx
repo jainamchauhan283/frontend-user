@@ -10,13 +10,11 @@ import {
 import { ChangeEvent, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setFormData } from "../redux/formSlice";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { toast } from "react-hot-toast";
-
-const baseUrl = "http://localhost:5000/users";
+import { loginUser } from "./apiserver";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -65,15 +63,10 @@ const LoginPage: React.FC = () => {
     }
 
     try {
-      const response = await axios.post(`${baseUrl}/login`, {
-        userEmail: email,
-        userPassword: password,
-      });
+      const { status, data } = await loginUser(email, password);
 
-      const { data } = response;
-
-      if (data && data.user) {
-        // Dispatch form data to Redux
+      if (status && data && data.user) {
+        // Dispatch form data to Redux or handle data as needed
         dispatch(
           setFormData({
             username: data.user.userName,
@@ -81,22 +74,17 @@ const LoginPage: React.FC = () => {
             accessToken: data.accessToken,
           })
         );
-        // Show success toast
-        toast.success("Login successful", { duration: 1500 });
+        toast.success("Login successful", { duration: 1500 }); // Show success toast
         setTimeout(() => {
           // Navigate to TaskPage
           navigate("/task", { replace: true });
         }, 1000);
+      } else {
+        // Handle unsuccessful login
+        setError("Invalid credentials");
       }
     } catch (error: any) {
-      // Handle error response
-      if (error.response && error.response.data) {
-        setError("Invalid credentials");
-        toast.error(error.response.data.error, { duration: 2000 });
-      } else {
-        setError("Something went wrong. Please try again.");
-        console.error(error);
-      }
+      setError("Something went wrong. Please try again.");
     }
   };
 
@@ -166,9 +154,9 @@ const LoginPage: React.FC = () => {
             {passwordError}
           </Typography>
         )}
-        {/* <Typography variant="body2" color="error">
+        <Typography variant="body2" color="error">
           {error}
-        </Typography> */}
+        </Typography>
         <Button
           variant="contained"
           fullWidth

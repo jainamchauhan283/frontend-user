@@ -158,11 +158,7 @@ const AddUser: React.FC = () => {
         ) {
           setEmailError("Email already exists"); // Set specific error message for email field
         } else {
-          // Handle other errors or display a generic error message
         }
-        toast.error("Something went wrong, please try again", {
-          duration: 1000,
-        });
       });
   };
 

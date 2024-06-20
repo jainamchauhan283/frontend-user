@@ -6,6 +6,10 @@ import {
   ButtonGroup,
   Card,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   IconButton,
   InputBase,
@@ -36,6 +40,8 @@ const TaskPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false); // State to manage edit mode
   const [editTaskId, setEditTaskId] = useState(""); // State to store task ID being edited
+  const [deleteTaskId, setDeleteTaskId] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!accessToken) {
@@ -56,10 +62,15 @@ const TaskPage: React.FC = () => {
       });
       const data = response.data;
       setTasks(data);
-    } catch (error) {
-      setError("Failed to fetch tasks");
-      console.error(error);
-      toast.error("Failed to fetch task", { duration: 2000 }); // Show error toast
+    } catch (error:any) {
+      if (error.response && error.response.status === 403) {
+        // Token expired or invalid, redirect to login
+        navigate("/login", { replace: true });
+      } else {
+        setError("Failed to fetch tasks");
+        console.error("Failed to fetch tasks:", error);
+        toast.error("Failed to fetch tasks", { duration: 2000 });
+      }
     } finally {
       setLoading(false);
     }
@@ -142,26 +153,34 @@ const TaskPage: React.FC = () => {
     setEditMode(false);
   };
 
-  const handleDeleteTask = async (taskId: string) => {
+  const handleDeleteTask = (taskId: string) => {
+    setDeleteTaskId(taskId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`${baseUrl}/api/delete/${taskId}`, {
+      await axios.delete(`${baseUrl}/api/delete/${deleteTaskId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      // Remove the deleted task from the tasks array
-      const updatedTasks = tasks.filter((task) => task._id !== taskId);
+      const updatedTasks = tasks.filter((task) => task._id !== deleteTaskId);
       setTasks(updatedTasks);
-
-      toast.success("Delete successful", { duration: 2000 }); // Show delete toast
+      setDeleteDialogOpen(false);
+      toast.success("Task deleted successfully", { duration: 2000 });
     } catch (error) {
-      // setError("Failed to delete task");
       console.error(error);
-      toast.error("Failed to delete task"); // show error toast
+      toast.error("Failed to delete task");
     } finally {
       setLoading(false);
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setDeleteTaskId("");
   };
 
   const handleLogout = async () => {
@@ -355,6 +374,20 @@ const TaskPage: React.FC = () => {
           ))
         )}
       </Box>
+      <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
+        <DialogTitle>Delete Task</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete this task?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDelete}>Cancel</Button>
+          <Button onClick={confirmDelete} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
