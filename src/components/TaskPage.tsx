@@ -19,14 +19,18 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
 import { clearFormData } from "../redux/formSlice";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DoneIcon from "@mui/icons-material/Done";
 import { toast } from "react-hot-toast";
-
-const baseUrl = "http://localhost:5000";
+import {
+  addTask,
+  deleteTask,
+  fetchTasks,
+  logoutUser,
+  updateTask,
+} from "./apiserver";
 
 const TaskPage: React.FC = () => {
   const navigate = useNavigate();
@@ -52,64 +56,50 @@ const TaskPage: React.FC = () => {
   }, [accessToken, navigate]);
 
   const fetchUserTasks = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-
-      const response = await axios.get(`${baseUrl}/api/get/tasks`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const data = response.data;
-      setTasks(data);
-    } catch (error:any) {
-      if (error.response && error.response.status === 403) {
-        // Token expired or invalid, redirect to login
-        navigate("/login", { replace: true });
+      const { status, data, error } = await fetchTasks(accessToken);
+      if (status) {
+        setTasks(data);
       } else {
         setError("Failed to fetch tasks");
-        console.error("Failed to fetch tasks:", error);
         toast.error("Failed to fetch tasks", { duration: 2000 });
+        if (error === "Request failed with status code 403") {
+          navigate("/login", { replace: true });
+        }
       }
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      setError("Failed to fetch tasks");
+      toast.error("Failed to fetch tasks", { duration: 2000 });
+      console.error("Failed to fetch tasks:", error);
     }
+    setLoading(false);
   };
 
   const handleAddTask = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    // Check if taskName is empty
     if (taskName.trim() === "") {
       setError("Please Enter a Task");
       return;
     }
-    setError(""); // Clear any existing error message
+    setError("");
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await axios.post(
-        `${baseUrl}/api/post/tasks`,
-        { taskName },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      const data = response.data;
-      // Check if data contains a task object
-      if (data && data.task) {
-        setTaskName(""); // Clear the task input field
-
-        setTasks([...tasks, data.task]); // Update tasks state to reflect new task add
+      const { status, data } = await addTask(taskName, accessToken);
+      if (status) {
+        setTasks([...tasks, data.task]);
+        setTaskName("");
         toast.success("Task added successfully", { duration: 2000 });
+      } else {
+        setError("Failed to add task");
+        toast.error("Failed to add task", { duration: 2000 });
       }
     } catch (error) {
       setError("Failed to add task");
+      toast.error("Failed to add task", { duration: 2000 });
       console.error(error);
-      toast.error("Failed to add task", { duration: 2000 }); // Show error toast
-    } finally {
-      setLoading(false); // Reset loading state
     }
+    setLoading(false);
   };
 
   const handleEditClick = (taskId: string, currentTaskName: string) => {
@@ -119,32 +109,25 @@ const TaskPage: React.FC = () => {
   };
 
   const handleDoneEdit = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      // Make PATCH request to update the task
-      await axios.patch(
-        `${baseUrl}/api/update/${editTaskId}`,
-        { taskName },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      // Clear the input field and reset state
-      setTaskName("");
-      setEditTaskId("");
-      setEditMode(false);
-
-      fetchUserTasks(); // Refetch tasks to update the list
-      toast.success("Task Update successfully");
+      const { status } = await updateTask(editTaskId, taskName, accessToken);
+      if (status) {
+        setEditMode(false);
+        setEditTaskId("");
+        setTaskName("");
+        fetchUserTasks();
+        toast.success("Task updated successfully");
+      } else {
+        setError("Failed to update task");
+        toast.error("Failed to update task", { duration: 2000 });
+      }
     } catch (error) {
       setError("Failed to update task");
+      toast.error("Failed to update task", { duration: 2000 });
       console.error(error);
-      toast.error("Failed to Update successfully"); // Show error toast
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleCancelEdit = () => {
@@ -159,23 +142,21 @@ const TaskPage: React.FC = () => {
   };
 
   const confirmDelete = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      await axios.delete(`${baseUrl}/api/delete/${deleteTaskId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const updatedTasks = tasks.filter((task) => task._id !== deleteTaskId);
-      setTasks(updatedTasks);
-      setDeleteDialogOpen(false);
-      toast.success("Task deleted successfully", { duration: 2000 });
+      const { status } = await deleteTask(deleteTaskId, accessToken);
+      if (status) {
+        setTasks(tasks.filter((task) => task._id !== deleteTaskId));
+        setDeleteDialogOpen(false);
+        toast.success("Task deleted successfully", { duration: 2000 });
+      } else {
+        toast.error("Failed to delete task", { duration: 2000 });
+      }
     } catch (error) {
+      toast.error("Failed to delete task", { duration: 2000 });
       console.error(error);
-      toast.error("Failed to delete task");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const cancelDelete = () => {
@@ -184,30 +165,21 @@ const TaskPage: React.FC = () => {
   };
 
   const handleLogout = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      await axios.post(
-        `${baseUrl}/users/logout`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      dispatch(clearFormData()); // Clear Redux form data
-      setTimeout(() => {
-        toast.success("Logout successful"); // show logout toast msg
-      }, 1000);
-      navigate("/login", { replace: true }); // Navigate to login page
+      const { status } = await logoutUser(accessToken);
+      if (status) {
+        dispatch(clearFormData());
+        toast.success("Logout successful");
+        navigate("/login", { replace: true });
+      } else {
+        toast.error("Failed to logout", { duration: 2000 });
+      }
     } catch (error) {
-      // setError("Failed to logout");
+      toast.error("Failed to logout", { duration: 2000 });
       console.error(error);
-      toast.error("Something went wrong"); // show error toast
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (
@@ -332,7 +304,6 @@ const TaskPage: React.FC = () => {
             <Card
               key={task._id}
               variant="outlined"
-              // sx={{ mt: 1, p: 1, width: "100%" }}
               sx={{
                 display: "flex",
                 alignItems: "center",

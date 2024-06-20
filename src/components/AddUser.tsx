@@ -1,10 +1,8 @@
 import React, { useState, ChangeEvent } from "react";
 import { Box, Card, TextField, Button, Typography, Input } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-hot-toast";
-
-const baseUrl = "http://localhost:5000/users"; // Base URL declaration
+import { addUser } from "./apiserver";
 
 const AddUser: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +18,7 @@ const AddUser: React.FC = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imageError, setImageError] = useState("");
+  const [error, setError] = useState("");
 
   const onChangeName = (event: ChangeEvent<HTMLInputElement>) => {
     const newName = event.target.value;
@@ -132,34 +131,25 @@ const AddUser: React.FC = () => {
       formData.append("userImage", image);
     }
 
-    axios
-      .post(
-        `${baseUrl}/post`,
-        formData
-        //   {
-        //   userName: name,
-        //   userEmail: email,
-        //   userMobile: mobile,
-        //   userPassword: password,
-        //   userImage: image,
-        // }
-      )
-      .then((res) => {
-        console.log("User added:", res.data);
-        // navigate("/", { replace: true });
-        toast.success("registration successful", { duration: 1000 });
+    try {
+      const { status, data, error } = await addUser(formData);
+
+      if (status && data) {
+        console.log("User added:", data);
+        toast.success("Registration successful", { duration: 1000 });
         navigate("/login", { replace: true });
-      })
-      .catch((error) => {
-        console.error("Error adding data", error);
-        if (
-          error.response &&
-          error.response.data.error === "This Email already exists"
-        ) {
-          setEmailError("Email already exists"); // Set specific error message for email field
+      } else {
+        if (error === "This Email already exists") {
+          setEmailError("Email already exists");
         } else {
+          console.error("Error adding data", error);
+          setError("Something went wrong. Please try again....");
         }
-      });
+      }
+    } catch (error) {
+      console.error("Error adding data", error);
+      setError("Something went wrong. Please try again.");
+    }
   };
 
   // const handleCancel = () => {
@@ -262,9 +252,10 @@ const AddUser: React.FC = () => {
           }}
           onChange={onChangeFile}
         />
-        {/* {imageError && ( */}
-        <span style={{ color: "red", marginTop: 4 }}>{imageError}</span>
-        {/* )} */}
+        {imageError && (
+          <span style={{ color: "red", marginTop: 4 }}>{imageError}</span>
+        )}
+        {error && <Typography color="error">{error}</Typography>}
         {/* <Box
           sx={{
             display: "flex",
