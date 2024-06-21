@@ -63,7 +63,8 @@ const LoginPage: React.FC = () => {
     }
 
     try {
-      const { status, data } = await loginUser(email, password);
+      const payload = { email, password };
+      const { status, data } = await loginUser(payload);
 
       if (status && data && data.user) {
         // Dispatch form data to Redux or handle data as needed
@@ -84,7 +85,8 @@ const LoginPage: React.FC = () => {
         setError("Invalid credentials");
       }
     } catch (error: any) {
-      setError("Something went wrong. Please try again.");
+      // setError("Something went wrong. Please try again.");
+      setError(error.message);
     }
   };
 

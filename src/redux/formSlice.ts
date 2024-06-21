@@ -1,4 +1,3 @@
-// formSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
 
 interface FormState {
@@ -18,7 +17,6 @@ const formSlice = createSlice({
   initialState,
   reducers: {
     setFormData: (state, action) => {
-      debugger
       state.username = action.payload.username;
       state.email = action.payload.email;
       state.accessToken = action.payload.accessToken;

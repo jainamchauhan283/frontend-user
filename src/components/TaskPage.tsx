@@ -68,8 +68,9 @@ const TaskPage: React.FC = () => {
           navigate("/login", { replace: true });
         }
       }
-    } catch (error) {
-      setError("Failed to fetch tasks");
+    } catch (error: any) {
+      // setError("Failed to fetch tasks");
+      setError(error.message);
       toast.error("Failed to fetch tasks", { duration: 2000 });
       console.error("Failed to fetch tasks:", error);
     }
@@ -78,14 +79,18 @@ const TaskPage: React.FC = () => {
 
   const handleAddTask = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    setLoading(true);
+    const payload = {
+      taskName: taskName,
+      accessToken: accessToken,
+    };
     if (taskName.trim() === "") {
       setError("Please Enter a Task");
       return;
     }
     setError("");
-    setLoading(true);
     try {
-      const { status, data } = await addTask(taskName, accessToken);
+      const { status, data } = await addTask(payload);
       if (status) {
         setTasks([...tasks, data.task]);
         setTaskName("");
@@ -94,8 +99,9 @@ const TaskPage: React.FC = () => {
         setError("Failed to add task");
         toast.error("Failed to add task", { duration: 2000 });
       }
-    } catch (error) {
-      setError("Failed to add task");
+    } catch (error: any) {
+      // setError("Failed to add task");
+      setError(error.message);
       toast.error("Failed to add task", { duration: 2000 });
       console.error(error);
     }
@@ -110,8 +116,16 @@ const TaskPage: React.FC = () => {
 
   const handleDoneEdit = async () => {
     setLoading(true);
+    const payload = {
+      taskId: editTaskId,
+      taskName: taskName,
+      accessToken: accessToken,
+    };
     try {
-      const { status } = await updateTask(editTaskId, taskName, accessToken);
+      const { status } = await updateTask(
+        payload
+        // editTaskId, taskName, accessToken
+      );
       if (status) {
         setEditMode(false);
         setEditTaskId("");
@@ -122,8 +136,9 @@ const TaskPage: React.FC = () => {
         setError("Failed to update task");
         toast.error("Failed to update task", { duration: 2000 });
       }
-    } catch (error) {
-      setError("Failed to update task");
+    } catch (error: any) {
+      // setError("Failed to update task");
+      setError(error.message);
       toast.error("Failed to update task", { duration: 2000 });
       console.error(error);
     }
@@ -143,8 +158,12 @@ const TaskPage: React.FC = () => {
 
   const confirmDelete = async () => {
     setLoading(true);
+    const payload = {
+      taskId: deleteTaskId,
+      accessToken: accessToken,
+    };
     try {
-      const { status } = await deleteTask(deleteTaskId, accessToken);
+      const { status } = await deleteTask(payload);
       if (status) {
         setTasks(tasks.filter((task) => task._id !== deleteTaskId));
         setDeleteDialogOpen(false);

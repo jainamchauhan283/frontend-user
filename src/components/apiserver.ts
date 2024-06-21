@@ -1,32 +1,29 @@
 import axios from "axios";
 
-const baseUrl = "http://localhost:5000";
+const baseUrl = process.env.REACT_APP_BASE_URL;
 
 // login user
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (payload: any) => {
+  console.log(baseUrl);
+  payload = {
+    userEmail: payload.email,
+    userPassword: payload.password,
+  };
   try {
-    const response = await axios.post(`${baseUrl}/users/login`, {
-      userEmail: email,
-      userPassword: password,
-    });
+    const response = await axios.post(`${baseUrl}/users/login`, payload);
     return { status: true, data: response.data };
   } catch (error: any) {
-    return { status: false, error: error.message };
+    return { status: false, error: error };
   }
 };
 
 // logout user
-export const logoutUser = async (accessToken: string) => {
+export const logoutUser = async (payload: any) => {
+  const headers = {
+    Authorization: `Bearer ${payload.accessToken}`,
+  };
   try {
-    await axios.post(
-      `${baseUrl}/users/logout`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    await axios.post(`${baseUrl}/users/logout`, {}, { headers });
     return { status: true };
   } catch (error: any) {
     return { status: false, error: error.message };
@@ -58,38 +55,33 @@ export const fetchTasks = async (accessToken: string) => {
 };
 
 // Add task
-export const addTask = async (taskName: string, accessToken: string) => {
+export const addTask = async (payload: any) => {
   try {
-    const response = await axios.post(
-      `${baseUrl}/api/post/tasks`,
-      { taskName },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    const body = {
+      taskName: payload.taskName,
+    };
+    const response = await axios.post(`${baseUrl}/api/post/tasks`, body, {
+      headers: {
+        Authorization: `Bearer ${payload.accessToken}`,
+      },
+    });
     return { status: true, data: response.data };
   } catch (error: any) {
     return { status: false, error: error.message };
   }
 };
 
-export const updateTask = async (
-  taskId: string,
-  taskName: string,
-  accessToken: string
-) => {
+export const updateTask = async (payload: any) => {
+  const body = {
+    taskId: payload.taskId,
+    taskName: payload.taskName,
+  };
   try {
-    await axios.patch(
-      `${baseUrl}/api/update/${taskId}`,
-      { taskName },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    await axios.patch(`${baseUrl}/api/update/${body.taskId}`, body, {
+      headers: {
+        Authorization: `Bearer ${payload.accessToken}`,
+      },
+    });
     return { status: true };
   } catch (error: any) {
     return { status: false, error: error.message };
@@ -97,11 +89,11 @@ export const updateTask = async (
 };
 
 // Delete task
-export const deleteTask = async (taskId: string, accessToken: string) => {
+export const deleteTask = async (payload: any) => {
   try {
-    await axios.delete(`${baseUrl}/api/delete/${taskId}`, {
+    await axios.delete(`${baseUrl}/api/delete/${payload.taskId}`, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${payload.accessToken}`,
       },
     });
     return { status: true };

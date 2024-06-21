@@ -146,9 +146,10 @@ const AddUser: React.FC = () => {
           setError("Something went wrong. Please try again....");
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding data", error);
-      setError("Something went wrong. Please try again.");
+      // setError("Something went wrong. Please try again.");
+      setError(error.message);
     }
   };
 
