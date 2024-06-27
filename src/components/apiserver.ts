@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstance from "./axiosInterceptors";
 
 const baseUrl = process.env.REACT_APP_BASE_URL;
 
@@ -10,7 +10,7 @@ export const loginUser = async (payload: any) => {
     userPassword: payload.password,
   };
   try {
-    const response = await axios.post(`${baseUrl}/users/login`, payload);
+    const response = await axiosInstance.post(`/users/login`, payload);
     return { status: true, data: response.data };
   } catch (error: any) {
     return { status: false, error: error };
@@ -23,7 +23,7 @@ export const logoutUser = async (payload: any) => {
     Authorization: `Bearer ${payload.accessToken}`,
   };
   try {
-    await axios.post(`${baseUrl}/users/logout`, {}, { headers });
+    await axiosInstance.post(`${baseUrl}/users/logout`, {}, { headers });
     return { status: true };
   } catch (error: any) {
     return { status: false, error: error.message };
@@ -33,7 +33,7 @@ export const logoutUser = async (payload: any) => {
 // add user
 export const addUser = async (formData: FormData) => {
   try {
-    const response = await axios.post(`${baseUrl}/users/post`, formData);
+    const response = await axiosInstance.post(`${baseUrl}/users/post`, formData);
     return { status: true, data: response.data };
   } catch (error: any) {
     return { status: false, error: error.message };
@@ -43,7 +43,7 @@ export const addUser = async (formData: FormData) => {
 // Fetch  tasks
 export const fetchTasks = async (accessToken: string) => {
   try {
-    const response = await axios.get(`${baseUrl}/api/get/tasks`, {
+    const response = await axiosInstance.get(`${baseUrl}/api/get/tasks`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -60,7 +60,7 @@ export const addTask = async (payload: any) => {
     const body = {
       taskName: payload.taskName,
     };
-    const response = await axios.post(`${baseUrl}/api/post/tasks`, body, {
+    const response = await axiosInstance.post(`${baseUrl}/api/post/tasks`, body, {
       headers: {
         Authorization: `Bearer ${payload.accessToken}`,
       },
@@ -71,13 +71,14 @@ export const addTask = async (payload: any) => {
   }
 };
 
+// Update task
 export const updateTask = async (payload: any) => {
   const body = {
     taskId: payload.taskId,
     taskName: payload.taskName,
   };
   try {
-    await axios.patch(`${baseUrl}/api/update/${body.taskId}`, body, {
+    await axiosInstance.patch(`${baseUrl}/api/update/${body.taskId}`, body, {
       headers: {
         Authorization: `Bearer ${payload.accessToken}`,
       },
@@ -91,7 +92,7 @@ export const updateTask = async (payload: any) => {
 // Delete task
 export const deleteTask = async (payload: any) => {
   try {
-    await axios.delete(`${baseUrl}/api/delete/${payload.taskId}`, {
+    await axiosInstance.delete(`${baseUrl}/api/delete/${payload.taskId}`, {
       headers: {
         Authorization: `Bearer ${payload.accessToken}`,
       },

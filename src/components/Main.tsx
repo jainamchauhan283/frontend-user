@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 
 const Main = () => {
   const accessToken = useSelector((state: any) => state.form.accessToken);
-  debugger
+  // debugger
   if (accessToken) {
     return <Navigate to="/task" replace />;
   } else {

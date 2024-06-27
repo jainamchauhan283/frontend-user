@@ -80,10 +80,11 @@ const TaskPage: React.FC = () => {
   const handleAddTask = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setLoading(true);
+    setLoading(true);
     const payload = {
-      taskName: taskName,
-      accessToken: accessToken,
-    };
+      taskName,
+      accessToken,
+    };  
     if (taskName.trim() === "") {
       setError("Please Enter a Task");
       return;
@@ -191,9 +192,10 @@ const TaskPage: React.FC = () => {
         dispatch(clearFormData());
         toast.success("Logout successful");
         navigate("/login", { replace: true });
-      } else {
-        toast.error("Failed to logout", { duration: 2000 });
       }
+      // else {
+      //   toast.error("Failed to logout.........", { duration: 2000 });
+      // }
     } catch (error) {
       toast.error("Failed to logout", { duration: 2000 });
       console.error(error);
