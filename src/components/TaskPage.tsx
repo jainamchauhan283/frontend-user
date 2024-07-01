@@ -63,12 +63,10 @@ const TaskPage: React.FC = () => {
     }
     const handleOnline = () => {
       setIsOnline(true);
-      toast.success("You are online", { duration: 2000 });
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      toast.error("You are offline", { duration: 2000 });
     };
 
     window.addEventListener("online", handleOnline);
@@ -82,6 +80,7 @@ const TaskPage: React.FC = () => {
 
   const fetchUserTasks = async () => {
     if (!isOnline) {
+      setTasks([]); // Clear tasks when offline
       toast.error("You are offline. Cannot fetch tasks.", { duration: 2000 });
       return;
     }
@@ -111,7 +110,6 @@ const TaskPage: React.FC = () => {
       return;
     }
     e.preventDefault();
-    setLoading(true);
     setLoading(true);
     const payload = {
       taskName,
@@ -160,10 +158,7 @@ const TaskPage: React.FC = () => {
       accessToken: accessToken,
     };
     try {
-      const { status } = await updateTask(
-        payload
-        // editTaskId, taskName, accessToken
-      );
+      const { status } = await updateTask(payload);
       if (status) {
         setEditMode(false);
         setEditTaskId("");
@@ -311,56 +306,17 @@ const TaskPage: React.FC = () => {
             </IconButton>
           )}
         </Paper>
-        {/* <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            width: "100%",
-          }}
-        >
-          <TextField
-            label="Task"
-            type="text"
-            autoComplete="Task"
-            fullWidth
-            margin="normal"
-            value={taskName}
-            onChange={(e) => setTaskName(e.target.value)}
-          />
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              m: 2,
-            }}
-          >
-            <Button
-              variant="outlined"
-              fullWidth
-              sx={{ width: "calc(50% - 8px)" }}
-              color="error"
-              onClick={() => setTaskName("")} // Clear input on Cancel
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{ width: "calc(50% - 8px)" }}
-              color="primary"
-              onClick={handleAddTask}
-            >
-              Add
-            </Button>
-          </Box>
-        </Box> */}
+
         <Typography variant="body1" color="error" sx={{ mt: 1 }}>
           {error}
         </Typography>
 
         {loading ? (
           <CircularProgress sx={{ mt: 3 }} />
+        ) : !isOnline ? (
+          <Typography variant="h6" color="error" sx={{ mt: 3 }}>
+            You are offline. Please check your internet connection.
+          </Typography>
         ) : (
           tasks.map((task) => (
             <Card
@@ -375,15 +331,6 @@ const TaskPage: React.FC = () => {
               }}
             >
               <Typography variant="h6" sx={{ ml: 1, flex: 1 }}>
-                {/* {task._id === editTaskId ? (
-                  <InputBase
-                    value={taskName}
-                    onChange={(e) => setTaskName(e.target.value)}
-                    autoFocus
-                  />
-                ) : (
-                  task.taskName
-                )} */}
                 {task.taskName}
               </Typography>
               <ButtonGroup variant="text" aria-label="Basic button group">
