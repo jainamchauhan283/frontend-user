@@ -46,6 +46,14 @@ const TaskPage: React.FC = () => {
   const [editTaskId, setEditTaskId] = useState(""); // State to store task ID being edited
   const [deleteTaskId, setDeleteTaskId] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return String(error);
+  };
 
   useEffect(() => {
     if (!accessToken) {
@@ -53,24 +61,44 @@ const TaskPage: React.FC = () => {
     } else {
       fetchUserTasks();
     }
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast.success("You are online", { duration: 2000 });
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.error("You are offline", { duration: 2000 });
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
   }, [accessToken, navigate]);
 
   const fetchUserTasks = async () => {
+    if (!isOnline) {
+      toast.error("You are offline. Cannot fetch tasks.", { duration: 2000 });
+      return;
+    }
     setLoading(true);
     try {
       const { status, data, error } = await fetchTasks(accessToken);
       if (status) {
         setTasks(data);
       } else {
-        setError("Failed to fetch tasks");
+        // setError("Failed to fetch tasks");
         toast.error("Failed to fetch tasks", { duration: 2000 });
         if (error === "Request failed with status code 403") {
           navigate("/login", { replace: true });
         }
       }
-    } catch (error: any) {
-      // setError("Failed to fetch tasks");
-      setError(error.message);
+    } catch (error: unknown) {
+      setError(getErrorMessage(error));
       toast.error("Failed to fetch tasks", { duration: 2000 });
       console.error("Failed to fetch tasks:", error);
     }
@@ -78,13 +106,17 @@ const TaskPage: React.FC = () => {
   };
 
   const handleAddTask = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isOnline) {
+      toast.error("You are offline. Cannot add task.", { duration: 2000 });
+      return;
+    }
     e.preventDefault();
     setLoading(true);
     setLoading(true);
     const payload = {
       taskName,
       accessToken,
-    };  
+    };
     if (taskName.trim() === "") {
       setError("Please Enter a Task");
       return;
@@ -100,9 +132,9 @@ const TaskPage: React.FC = () => {
         setError("Failed to add task");
         toast.error("Failed to add task", { duration: 2000 });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // setError("Failed to add task");
-      setError(error.message);
+      setError(getErrorMessage(error));
       toast.error("Failed to add task", { duration: 2000 });
       console.error(error);
     }
@@ -116,6 +148,11 @@ const TaskPage: React.FC = () => {
   };
 
   const handleDoneEdit = async () => {
+    if (!isOnline) {
+      toast.error("You are offline. Cannot update task.", { duration: 2000 });
+      return;
+    }
+
     setLoading(true);
     const payload = {
       taskId: editTaskId,
@@ -137,9 +174,9 @@ const TaskPage: React.FC = () => {
         setError("Failed to update task");
         toast.error("Failed to update task", { duration: 2000 });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // setError("Failed to update task");
-      setError(error.message);
+      setError(getErrorMessage(error));
       toast.error("Failed to update task", { duration: 2000 });
       console.error(error);
     }
@@ -158,6 +195,10 @@ const TaskPage: React.FC = () => {
   };
 
   const confirmDelete = async () => {
+    if (!isOnline) {
+      toast.error("You are offline. Cannot delete task.", { duration: 2000 });
+      return;
+    }
     setLoading(true);
     const payload = {
       taskId: deleteTaskId,

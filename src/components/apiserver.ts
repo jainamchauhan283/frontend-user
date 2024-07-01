@@ -2,6 +2,14 @@ import axiosInstance from "./axiosInterceptors";
 
 const baseUrl = process.env.REACT_APP_BASE_URL;
 
+// Helper function to extract error message
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+};
+
 // login user
 export const loginUser = async (payload: any) => {
   console.log(baseUrl);
@@ -12,8 +20,8 @@ export const loginUser = async (payload: any) => {
   try {
     const response = await axiosInstance.post(`/users/login`, payload);
     return { status: true, data: response.data };
-  } catch (error: any) {
-    return { status: false, error: error };
+  } catch (error) {
+    return { status: false, error: getErrorMessage(error) };
   }
 };
 
@@ -33,7 +41,10 @@ export const logoutUser = async (payload: any) => {
 // add user
 export const addUser = async (formData: FormData) => {
   try {
-    const response = await axiosInstance.post(`${baseUrl}/users/post`, formData);
+    const response = await axiosInstance.post(
+      `${baseUrl}/users/post`,
+      formData
+    );
     return { status: true, data: response.data };
   } catch (error: any) {
     return { status: false, error: error.message };
@@ -60,14 +71,18 @@ export const addTask = async (payload: any) => {
     const body = {
       taskName: payload.taskName,
     };
-    const response = await axiosInstance.post(`${baseUrl}/api/post/tasks`, body, {
-      headers: {
-        Authorization: `Bearer ${payload.accessToken}`,
-      },
-    });
+    const response = await axiosInstance.post(
+      `${baseUrl}/api/post/tasks`,
+      body,
+      {
+        headers: {
+          Authorization: `Bearer ${payload.accessToken}`,
+        },
+      }
+    );
     return { status: true, data: response.data };
-  } catch (error: any) {
-    return { status: false, error: error.message };
+  } catch (error) {
+    return { status: false, error: getErrorMessage(error) };
   }
 };
 
@@ -84,8 +99,8 @@ export const updateTask = async (payload: any) => {
       },
     });
     return { status: true };
-  } catch (error: any) {
-    return { status: false, error: error.message };
+  } catch (error) {
+    return { status: false, error: getErrorMessage(error) };
   }
 };
 
@@ -98,7 +113,7 @@ export const deleteTask = async (payload: any) => {
       },
     });
     return { status: true };
-  } catch (error: any) {
-    return { status: false, error: error.message };
+  } catch (error) {
+    return { status: false, error: getErrorMessage(error) };
   }
 };

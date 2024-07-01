@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setFormData } from "../redux/formSlice";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,27 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return String(error);
+  };
 
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
@@ -56,6 +77,14 @@ const LoginPage: React.FC = () => {
   };
 
   const handleLogin = async () => {
+    if (!isOnline) {
+      toast.error(
+        "No internet connection. Please try again when you are online.",
+        { duration: 2000 }
+      );
+      return;
+    }
+
     if (!email || !password) {
       setEmailError(!email ? "Please enter an email" : "");
       setPasswordError(!password ? "Please enter a password" : "");
@@ -84,9 +113,9 @@ const LoginPage: React.FC = () => {
         // Handle unsuccessful login
         setError("Invalid credentials");
       }
-    } catch (error: any) {
+    } catch (error) {
       // setError("Something went wrong. Please try again.");
-      setError(error.message);
+      setError(getErrorMessage(error));
     }
   };
 
@@ -103,6 +132,11 @@ const LoginPage: React.FC = () => {
         alignItems: "center",
       }}
     >
+      {/* {!isOnline && (
+        <Typography color="error">
+          You are offline. Some functionalities may not be available.
+        </Typography>
+      )} */}
       <Card
         variant="outlined"
         sx={{

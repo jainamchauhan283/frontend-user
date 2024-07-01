@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import { Box, Card, TextField, Button, Typography, Input } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -19,6 +19,20 @@ const AddUser: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imageError, setImageError] = useState("");
   const [error, setError] = useState("");
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   const onChangeName = (event: ChangeEvent<HTMLInputElement>) => {
     const newName = event.target.value;
@@ -84,6 +98,14 @@ const AddUser: React.FC = () => {
   };
 
   const handleAddUser = async () => {
+    if (!isOnline) {
+      toast.error(
+        "No internet connection. Please try again when you are online.",
+        { duration: 2000 }
+      );
+      return;
+    }
+
     if (!name) {
       setNameError("Please enter a username");
     } else {
@@ -170,6 +192,12 @@ const AddUser: React.FC = () => {
         alignItems: "center",
       }}
     >
+      {" "}
+      {!isOnline && (
+        <Typography color="error">
+          You are offline. Some functionalities may not be available.
+        </Typography>
+      )}
       <Card
         variant="outlined"
         sx={{
