@@ -13,8 +13,9 @@ import { setFormData } from "../redux/formSlice";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { toast } from "react-hot-toast";
 import { loginUser } from "./apiserver";
+import { MESSAGES } from "../utils/Constants";
+import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -58,9 +59,9 @@ const LoginPage: React.FC = () => {
     const newEmail = event.target.value;
     setEmail(newEmail);
     if (!newEmail) {
-      setEmailError("Please enter an email address");
+      setEmailError(MESSAGES.ENTER_EMAIL);
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(newEmail)) {
-      setEmailError("Please enter a valid email address");
+      setEmailError(MESSAGES.VALID_EMAIL);
     } else {
       setEmailError("");
     }
@@ -70,7 +71,7 @@ const LoginPage: React.FC = () => {
     const newPassword = event.target.value;
     setPassword(newPassword);
     if (!newPassword) {
-      setPasswordError("Please enter a password");
+      setPasswordError(MESSAGES.ENTER_PASSWORD);
     } else {
       setPasswordError("");
     }
@@ -78,16 +79,13 @@ const LoginPage: React.FC = () => {
 
   const handleLogin = async () => {
     if (!isOnline) {
-      toast.error(
-        "No internet connection. Please try again when you are online.",
-        { duration: 2000 }
-      );
+      showErrorToast(MESSAGES.OFFLINE_ERROR); // Show no internet toast
       return;
     }
 
     if (!email || !password) {
-      setEmailError(!email ? "Please enter an email" : "");
-      setPasswordError(!password ? "Please enter a password" : "");
+      setEmailError(!email ? MESSAGES.ENTER_EMAIL : "");
+      setPasswordError(!password ? MESSAGES.ENTER_PASSWORD : "");
       return;
     }
 
@@ -104,14 +102,15 @@ const LoginPage: React.FC = () => {
             accessToken: data.accessToken,
           })
         );
-        toast.success("Login successful", { duration: 1500 }); // Show success toast
+
+        showSuccessToast(MESSAGES.LOGIN_SUCCESS); // Show success toast
         setTimeout(() => {
           // Navigate to TaskPage
           navigate("/task", { replace: true });
         }, 1000);
       } else {
         // Handle unsuccessful login
-        setError("Invalid credentials");
+        setError(MESSAGES.INVALID_CREDENTIAL);
       }
     } catch (error) {
       // setError("Something went wrong. Please try again.");
@@ -132,11 +131,7 @@ const LoginPage: React.FC = () => {
         alignItems: "center",
       }}
     >
-      {/* {!isOnline && (
-        <Typography color="error">
-          You are offline. Some functionalities may not be available.
-        </Typography>
-      )} */}
+      {/* {isOnline ? ( */}
       <Card
         variant="outlined"
         sx={{
@@ -207,6 +202,11 @@ const LoginPage: React.FC = () => {
           <Button onClick={handleRegister}>Register</Button>
         </Box>
       </Card>
+      {/* ) : (
+        <Typography variant="h6" color="red">
+          No internet connection. Please try again when you are online.
+        </Typography>
+      )} */}
     </Box>
   );
 };

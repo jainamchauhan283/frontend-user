@@ -1,8 +1,9 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { Box, Card, TextField, Button, Typography, Input } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-hot-toast";
 import { addUser } from "./apiserver";
+import { MESSAGES } from "../utils/Constants";
+import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 
 const AddUser: React.FC = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const AddUser: React.FC = () => {
     const newName = event.target.value;
     setName(newName);
     if (!newName) {
-      setNameError("Please enter a username");
+      setNameError(MESSAGES.ENTER_USERNAME);
     } else {
       setNameError("");
     }
@@ -48,9 +49,9 @@ const AddUser: React.FC = () => {
     const newEmail = event.target.value;
     setEmail(newEmail);
     if (!newEmail) {
-      setEmailError("Please enter an email address");
+      setEmailError(MESSAGES.ENTER_EMAIL);
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(newEmail)) {
-      setEmailError("Please enter a valid email address");
+      setEmailError(MESSAGES.VALID_EMAIL);
     } else {
       setEmailError("");
     }
@@ -60,7 +61,7 @@ const AddUser: React.FC = () => {
     const newMobile = event.target.value;
     setMobile(newMobile);
     if (!newMobile) {
-      setMobileError("Please enter a mobile number");
+      setMobileError(MESSAGES.ENTER_MOBILE);
     } else {
       setMobileError("");
     }
@@ -70,7 +71,7 @@ const AddUser: React.FC = () => {
     const newPassword = event.target.value;
     setPassword(newPassword);
     if (!newPassword) {
-      setPasswordError("Please enter a password");
+      setPasswordError(MESSAGES.ENTER_PASSWORD);
     } else {
       setPasswordError("");
     }
@@ -80,9 +81,9 @@ const AddUser: React.FC = () => {
     const newConfirmPassword = event.target.value;
     setConfirmPassword(newConfirmPassword);
     if (!newConfirmPassword) {
-      setConfirmPasswordError("Please confirm your password");
+      setConfirmPasswordError(MESSAGES.CONFIRM_PASSWORD);
     } else if (newConfirmPassword !== password) {
-      setConfirmPasswordError("Passwords do not match");
+      setConfirmPasswordError(MESSAGES.PASSWORDS_DO_NOT_MATCH);
     } else {
       setConfirmPasswordError("");
     }
@@ -99,47 +100,44 @@ const AddUser: React.FC = () => {
 
   const handleAddUser = async () => {
     if (!isOnline) {
-      toast.error(
-        "No internet connection. Please try again when you are online.",
-        { duration: 2000 }
-      );
+      showErrorToast(MESSAGES.OFFLINE_ERROR);
       return;
     }
 
     if (!name) {
-      setNameError("Please enter a username");
+      setNameError(MESSAGES.ENTER_USERNAME);
     } else {
       setNameError("");
     }
 
     if (!email) {
-      setEmailError("Please enter an email");
+      setEmailError(MESSAGES.ENTER_EMAIL);
     } else {
       setEmailError("");
     }
 
     if (!mobile) {
-      setMobileError("Please enter a mobile number");
+      setMobileError(MESSAGES.ENTER_MOBILE);
     } else {
       setMobileError("");
     }
 
     if (!password) {
-      setPasswordError("Please enter a password");
+      setPasswordError(MESSAGES.ENTER_PASSWORD);
     } else {
       setPasswordError("");
     }
 
     if (!confirmPassword) {
-      setConfirmPasswordError("Please confirm your password");
+      setConfirmPasswordError(MESSAGES.CONFIRM_PASSWORD);
     } else if (confirmPassword !== password) {
-      setConfirmPasswordError("Passwords do not match");
+      setConfirmPasswordError(MESSAGES.PASSWORDS_DO_NOT_MATCH);
     } else {
       setConfirmPasswordError("");
     }
 
     if (!image) {
-      setImageError("Please select an image");
+      setImageError(MESSAGES.SELECT_IMAGE);
     } else {
       setImageError("");
     }
@@ -158,14 +156,14 @@ const AddUser: React.FC = () => {
 
       if (status && data) {
         console.log("User added:", data);
-        toast.success("Registration successful", { duration: 1000 });
+        showSuccessToast(MESSAGES.REGISTRATION_SUCCESS);
         navigate("/login", { replace: true });
       } else {
         if (error === "This Email already exists") {
-          setEmailError("Email already exists");
+          setEmailError(MESSAGES.EMAIL_EXISTS);
         } else {
           console.error("Error adding data", error);
-          setError("Something went wrong. Please try again....");
+          setError(MESSAGES.SOMETHING_WENT_WRONG);
         }
       }
     } catch (error: any) {

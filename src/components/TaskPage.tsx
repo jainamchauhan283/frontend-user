@@ -23,7 +23,6 @@ import { clearFormData } from "../redux/formSlice";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DoneIcon from "@mui/icons-material/Done";
-import { toast } from "react-hot-toast";
 import {
   addTask,
   deleteTask,
@@ -31,6 +30,8 @@ import {
   logoutUser,
   updateTask,
 } from "./apiserver";
+import { MESSAGES } from "../utils/Constants";
+import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 
 const TaskPage: React.FC = () => {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ const TaskPage: React.FC = () => {
   const fetchUserTasks = async () => {
     if (!isOnline) {
       setTasks([]); // Clear tasks when offline
-      toast.error("You are offline. Cannot fetch tasks.", { duration: 2000 });
+      showErrorToast(MESSAGES.OFFLINE_TASK_ERROR);
       return;
     }
     setLoading(true);
@@ -91,14 +92,14 @@ const TaskPage: React.FC = () => {
         setTasks(data);
       } else {
         // setError("Failed to fetch tasks");
-        toast.error("Failed to fetch tasks", { duration: 2000 });
+        showErrorToast(MESSAGES.TASK_FETCH_FAILURE);
         if (error === "Request failed with status code 403") {
           navigate("/login", { replace: true });
         }
       }
     } catch (error: unknown) {
       setError(getErrorMessage(error));
-      toast.error("Failed to fetch tasks", { duration: 2000 });
+      showErrorToast(MESSAGES.TASK_FETCH_FAILURE);
       console.error("Failed to fetch tasks:", error);
     }
     setLoading(false);
@@ -106,7 +107,7 @@ const TaskPage: React.FC = () => {
 
   const handleAddTask = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isOnline) {
-      toast.error("You are offline. Cannot add task.", { duration: 2000 });
+      showErrorToast(MESSAGES.OFFLINE_ADD_TASK_ERROR);
       return;
     }
     e.preventDefault();
@@ -116,7 +117,7 @@ const TaskPage: React.FC = () => {
       accessToken,
     };
     if (taskName.trim() === "") {
-      setError("Please Enter a Task");
+      setError(MESSAGES.ENTER_TASK);
       return;
     }
     setError("");
@@ -125,15 +126,15 @@ const TaskPage: React.FC = () => {
       if (status) {
         setTasks([...tasks, data.task]);
         setTaskName("");
-        toast.success("Task added successfully", { duration: 2000 });
+        showSuccessToast(MESSAGES.ADD_TASK_SUCCESS);
       } else {
         setError("Failed to add task");
-        toast.error("Failed to add task", { duration: 2000 });
+         showErrorToast(MESSAGES.ADD_TASK_FAILURE);
       }
     } catch (error: unknown) {
       // setError("Failed to add task");
       setError(getErrorMessage(error));
-      toast.error("Failed to add task", { duration: 2000 });
+       showErrorToast(MESSAGES.ADD_TASK_FAILURE);
       console.error(error);
     }
     setLoading(false);
@@ -146,11 +147,6 @@ const TaskPage: React.FC = () => {
   };
 
   const handleDoneEdit = async () => {
-    if (!isOnline) {
-      toast.error("You are offline. Cannot update task.", { duration: 2000 });
-      return;
-    }
-
     setLoading(true);
     const payload = {
       taskId: editTaskId,
@@ -164,15 +160,15 @@ const TaskPage: React.FC = () => {
         setEditTaskId("");
         setTaskName("");
         fetchUserTasks();
-        toast.success("Task updated successfully");
+        showSuccessToast(MESSAGES.UPDATE_TASK_SUCCESS);
       } else {
         setError("Failed to update task");
-        toast.error("Failed to update task", { duration: 2000 });
+        showErrorToast(MESSAGES.UPDATE_TASK_FAILURE);
       }
     } catch (error: unknown) {
       // setError("Failed to update task");
       setError(getErrorMessage(error));
-      toast.error("Failed to update task", { duration: 2000 });
+      showErrorToast(MESSAGES.UPDATE_TASK_FAILURE);
       console.error(error);
     }
     setLoading(false);
@@ -190,10 +186,6 @@ const TaskPage: React.FC = () => {
   };
 
   const confirmDelete = async () => {
-    if (!isOnline) {
-      toast.error("You are offline. Cannot delete task.", { duration: 2000 });
-      return;
-    }
     setLoading(true);
     const payload = {
       taskId: deleteTaskId,
@@ -204,12 +196,12 @@ const TaskPage: React.FC = () => {
       if (status) {
         setTasks(tasks.filter((task) => task._id !== deleteTaskId));
         setDeleteDialogOpen(false);
-        toast.success("Task deleted successfully", { duration: 2000 });
+        showSuccessToast(MESSAGES.DELETE_TASK_SUCCESS);
       } else {
-        toast.error("Failed to delete task", { duration: 2000 });
+        showErrorToast(MESSAGES.DELETE_TASK_FAILURE);
       }
     } catch (error) {
-      toast.error("Failed to delete task", { duration: 2000 });
+      showErrorToast(MESSAGES.DELETE_TASK_FAILURE);
       console.error(error);
     }
     setLoading(false);
@@ -226,14 +218,14 @@ const TaskPage: React.FC = () => {
       const { status } = await logoutUser(accessToken);
       if (status) {
         dispatch(clearFormData());
-        toast.success("Logout successful");
+        showSuccessToast(MESSAGES.LOG_OUT_SUCCESS);
         navigate("/login", { replace: true });
       }
       // else {
       //   toast.error("Failed to logout.........", { duration: 2000 });
       // }
     } catch (error) {
-      toast.error("Failed to logout", { duration: 2000 });
+      showErrorToast(MESSAGES.LOG_OUT_FAILURE);
       console.error(error);
     }
     setLoading(false);
