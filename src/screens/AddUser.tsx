@@ -1,9 +1,9 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { Box, Card, TextField, Button, Typography, Input } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { addUser } from "./apiserver";
-import { MESSAGES } from "../utils/Constants";
-import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
+import { addUser } from "../services/apiServices";
+import { showSuccessToast, showErrorToast, logToConsole } from "../utils/utilities";
+import { MESSAGES } from "../utils/constants";
 
 const AddUser: React.FC = () => {
   const navigate = useNavigate();
@@ -155,19 +155,20 @@ const AddUser: React.FC = () => {
       const { status, data, error } = await addUser(formData);
 
       if (status && data) {
-        console.log("User added:", data);
+        logToConsole("User added:", data);
+        // console.log("User added:", data);
         showSuccessToast(MESSAGES.REGISTRATION_SUCCESS);
         navigate("/login", { replace: true });
       } else {
         if (error === "This Email already exists") {
           setEmailError(MESSAGES.EMAIL_EXISTS);
         } else {
-          console.error("Error adding data", error);
+          logToConsole("Error adding data", error);
           setError(MESSAGES.SOMETHING_WENT_WRONG);
         }
       }
     } catch (error: any) {
-      console.error("Error adding data", error);
+      logToConsole("Error adding data", error);
       // setError("Something went wrong. Please try again.");
       setError(error.message);
     }

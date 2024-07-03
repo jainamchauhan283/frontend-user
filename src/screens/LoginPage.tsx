@@ -9,13 +9,13 @@ import {
 } from "@mui/material";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { setFormData } from "../redux/formSlice";
+import { setFormData } from "../redux/reducer";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { loginUser } from "./apiserver";
-import { MESSAGES } from "../utils/Constants";
-import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
+import { loginUser } from "../services/apiServices";
+import { MESSAGES } from "../utils/constants";
+import { showSuccessToast, showErrorToast } from "../utils/utilities";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();

@@ -1,11 +1,11 @@
 import "./App.css";
-import HomePage from "./components/HomePage";
+import HomePage from "./screens/HomePage";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import AddUser from "./components/AddUser";
-import UpdateUser from "./components/UpdateUser";
-import LoginPage from "./components/LoginPage";
-import TaskPage from "./components/TaskPage";
-import Main from "./components/Main";
+import AddUser from "./screens/AddUser";
+import UpdateUser from "./screens/UpdateUser";
+import LoginPage from "./screens/LoginPage";
+import TaskPage from "./screens/TaskPage";
+import Main from "./navigations/Main";
 import { Provider} from "react-redux";
 import { store } from "./redux/store";
 import { Toaster } from "react-hot-toast";

@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { clearFormData } from "../redux/formSlice";
+import { clearFormData } from "../redux/reducer";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DoneIcon from "@mui/icons-material/Done";
@@ -29,9 +29,9 @@ import {
   fetchTasks,
   logoutUser,
   updateTask,
-} from "./apiserver";
-import { MESSAGES } from "../utils/Constants";
-import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
+} from "../services/apiServices";
+import { MESSAGES } from "../utils/constants";
+import { showSuccessToast, showErrorToast } from "../utils/utilities";
 
 const TaskPage: React.FC = () => {
   const navigate = useNavigate();
