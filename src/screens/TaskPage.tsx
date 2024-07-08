@@ -92,14 +92,14 @@ const TaskPage: React.FC = () => {
         setTasks(data);
       } else {
         // setError("Failed to fetch tasks");
-        showErrorToast(MESSAGES.TASK_FETCH_FAILURE);
+        // showErrorToast(MESSAGES.TASK_FETCH_FAILURE);
         if (error === "Request failed with status code 403") {
           navigate("/login", { replace: true });
         }
       }
     } catch (error: unknown) {
       setError(getErrorMessage(error));
-      showErrorToast(MESSAGES.TASK_FETCH_FAILURE);
+      // showErrorToast(MESSAGES.TASK_FETCH_FAILURE);
       console.error("Failed to fetch tasks:", error);
     }
     setLoading(false);
