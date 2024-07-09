@@ -91,36 +91,44 @@ const TaskPage: React.FC = () => {
       if (status) {
         setTasks(data);
       } else {
-        // setError("Failed to fetch tasks");
-        // showErrorToast(MESSAGES.TASK_FETCH_FAILURE);
         if (error === "Request failed with status code 403") {
           navigate("/login", { replace: true });
         }
       }
     } catch (error: unknown) {
       setError(getErrorMessage(error));
-      // showErrorToast(MESSAGES.TASK_FETCH_FAILURE);
       console.error("Failed to fetch tasks:", error);
     }
     setLoading(false);
   };
 
-  const handleAddTask = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleAddTask = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!isOnline) {
       showErrorToast(MESSAGES.OFFLINE_ADD_TASK_ERROR);
       return;
     }
-    e.preventDefault();
+    if (taskName.trim() === "") {
+      setError(MESSAGES.ENTER_TASK);
+      setLoading(false);
+      return;
+    }
+    if (
+      tasks.some(
+        (task) => task.taskName.toLowerCase() === taskName.toLowerCase()
+      )
+    ) {
+      setError(MESSAGES.DUPLICATE_TASK_ERROR);
+      return;
+    }
+
     setLoading(true);
+    setError("");
     const payload = {
       taskName,
       accessToken,
     };
-    if (taskName.trim() === "") {
-      setError(MESSAGES.ENTER_TASK);
-      return;
-    }
-    setError("");
+
     try {
       const { status, data } = await addTask(payload);
       if (status) {
@@ -129,12 +137,11 @@ const TaskPage: React.FC = () => {
         showSuccessToast(MESSAGES.ADD_TASK_SUCCESS);
       } else {
         setError("Failed to add task");
-         showErrorToast(MESSAGES.ADD_TASK_FAILURE);
+        showErrorToast(MESSAGES.ADD_TASK_FAILURE);
       }
     } catch (error: unknown) {
-      // setError("Failed to add task");
       setError(getErrorMessage(error));
-       showErrorToast(MESSAGES.ADD_TASK_FAILURE);
+      showErrorToast(MESSAGES.ADD_TASK_FAILURE);
       console.error(error);
     }
     setLoading(false);
@@ -146,7 +153,8 @@ const TaskPage: React.FC = () => {
     setEditMode(true); // Enable edit mode
   };
 
-  const handleDoneEdit = async () => {
+  const handleDoneEdit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setLoading(true);
     const payload = {
       taskId: editTaskId,
@@ -166,7 +174,6 @@ const TaskPage: React.FC = () => {
         showErrorToast(MESSAGES.UPDATE_TASK_FAILURE);
       }
     } catch (error: unknown) {
-      // setError("Failed to update task");
       setError(getErrorMessage(error));
       showErrorToast(MESSAGES.UPDATE_TASK_FAILURE);
       console.error(error);
@@ -221,9 +228,6 @@ const TaskPage: React.FC = () => {
         showSuccessToast(MESSAGES.LOG_OUT_SUCCESS);
         navigate("/login", { replace: true });
       }
-      // else {
-      //   toast.error("Failed to logout.........", { duration: 2000 });
-      // }
     } catch (error) {
       showErrorToast(MESSAGES.LOG_OUT_FAILURE);
       console.error(error);
@@ -249,6 +253,7 @@ const TaskPage: React.FC = () => {
       >
         <Paper
           component="form"
+          onSubmit={editMode ? handleDoneEdit : handleAddTask}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -278,25 +283,14 @@ const TaskPage: React.FC = () => {
             <CloseIcon />
           </IconButton>
           <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-          {editMode ? (
-            <IconButton
-              color="primary"
-              sx={{ p: "10px" }}
-              onClick={handleDoneEdit}
-              aria-label="done-edit"
-            >
-              <DoneIcon />
-            </IconButton>
-          ) : (
-            <IconButton
-              color="primary"
-              sx={{ p: "10px" }}
-              onClick={handleAddTask}
-              aria-label="add-task"
-            >
-              <AddIcon />
-            </IconButton>
-          )}
+          <IconButton
+            type="submit"
+            color="primary"
+            sx={{ p: "10px" }}
+            aria-label={editMode ? "done-edit" : "add-task"}
+          >
+            {editMode ? <DoneIcon /> : <AddIcon />}
+          </IconButton>
         </Paper>
 
         <Typography variant="body1" color="error" sx={{ mt: 1 }}>
@@ -309,7 +303,7 @@ const TaskPage: React.FC = () => {
           <Typography variant="h6" color="error" sx={{ mt: 3 }}>
             You are offline. Please check your internet connection.
           </Typography>
-        ) : (
+        ) :tasks.length > 0 ? (
           tasks.map((task) => (
             <Card
               key={task._id}
@@ -344,6 +338,10 @@ const TaskPage: React.FC = () => {
               </ButtonGroup>
             </Card>
           ))
+        ): (
+          <Typography variant="body1" sx={{ mt: 3 }}>
+            No tasks available.
+          </Typography>
         )}
       </Box>
       <Dialog open={deleteDialogOpen} onClose={cancelDelete}>

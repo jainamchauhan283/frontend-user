@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Card,
+  CircularProgress,
   IconButton,
   InputAdornment,
   TextField,
@@ -28,6 +29,7 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [loading, setLoading] = useState(false); 
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -89,6 +91,8 @@ const LoginPage: React.FC = () => {
       return;
     }
 
+    setLoading(true); 
+
     try {
       const payload = { email, password };
       const { status, data } = await loginUser(payload);
@@ -107,14 +111,16 @@ const LoginPage: React.FC = () => {
         setTimeout(() => {
           // Navigate to TaskPage
           navigate("/task", { replace: true });
+          setLoading(false); // Stop loading after navigation
         }, 1000);
       } else {
         // Handle unsuccessful login
         setError(MESSAGES.INVALID_CREDENTIAL);
+        setLoading(false); // Stop loading on error
       }
     } catch (error) {
-      // setError("Something went wrong. Please try again.");
       setError(getErrorMessage(error));
+      setLoading(false); // Stop loading on error
     }
   };
 
@@ -131,7 +137,6 @@ const LoginPage: React.FC = () => {
         alignItems: "center",
       }}
     >
-      {/* {isOnline ? ( */}
       <Card
         variant="outlined"
         sx={{
@@ -166,7 +171,6 @@ const LoginPage: React.FC = () => {
           value={password}
           onChange={onChangePassword}
           InputProps={{
-            // Use InputProps to include endAdornment
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
@@ -194,19 +198,15 @@ const LoginPage: React.FC = () => {
           color="primary"
           sx={{ marginTop: 2 }}
           onClick={handleLogin}
+          disabled={loading} // Disable button when loading
         >
-          Login
+          {loading ? <CircularProgress size={24} /> : "Login"}
         </Button>
         <Box mt={1}>
           <span>Don't have an account? </span>
           <Button onClick={handleRegister}>Register</Button>
         </Box>
       </Card>
-      {/* ) : (
-        <Typography variant="h6" color="red">
-          No internet connection. Please try again when you are online.
-        </Typography>
-      )} */}
     </Box>
   );
 };

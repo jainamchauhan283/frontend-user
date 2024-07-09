@@ -30,6 +30,7 @@ export const MESSAGES = {
     OFFLINE_ADD_TASK_ERROR: "You are offline. Cannot add task.",
     OFFLINE_UPDATE_TASK_ERROR: "You are offline. Cannot update task.",
     OFFLINE_DELETE_TASK_ERROR: "You are offline. Cannot delete task.",
+    DUPLICATE_TASK_ERROR: "This task already exists. Please enter a different task.",
     LOG_OUT_SUCCESS: "Logout successful",
     LOG_OUT_FAILURE: "Failed to logout",
   };
