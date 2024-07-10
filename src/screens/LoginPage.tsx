@@ -29,7 +29,7 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -91,7 +91,7 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    setLoading(true); 
+    setLoading(true);
 
     try {
       const payload = { email, password };
