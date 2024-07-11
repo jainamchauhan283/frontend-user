@@ -156,11 +156,25 @@ const AddUser: React.FC = () => {
     }
 
     try {
+      // const { status, data, error } = await addUser(formData);
+
+      // if (status && data) {
+      //   logToConsole("User added:", data);
+      //   // console.log("User added:", data);
+      //   showSuccessToast(MESSAGES.REGISTRATION_SUCCESS);
+      //   navigate("/login", { replace: true });
+      // } else {
+      //   if (error === "This Email already exists") {
+      //     setEmailError(MESSAGES.EMAIL_EXISTS);
+      //   } else {
+      //     logToConsole("Error adding data", error);
+      //     setError(MESSAGES.SOMETHING_WENT_WRONG);
+      //   }
+      // }
       const { status, data, error } = await addUser(formData);
 
       if (status && data) {
         logToConsole("User added:", data);
-        // console.log("User added:", data);
         showSuccessToast(MESSAGES.REGISTRATION_SUCCESS);
         navigate("/login", { replace: true });
       } else {
