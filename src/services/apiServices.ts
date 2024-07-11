@@ -1,5 +1,4 @@
 import axiosInstance from "./api";
-import { ApiResponse, LoginResponseData, LogoutResponse } from "./interfaces";
 
 const baseUrl = process.env.REACT_APP_BASE_URL;
 
@@ -12,16 +11,14 @@ const getErrorMessage = (error: unknown): string => {
 };
 
 // login user
-export const loginUser = async (payload: any): Promise<ApiResponse> => {
+export const loginUser = async (payload: any) => {
+  console.log(baseUrl);
   payload = {
     userEmail: payload.email,
     userPassword: payload.password,
   };
   try {
-    const response = await axiosInstance.post<LoginResponseData>(
-      `/users/login`,
-      payload
-    );
+    const response = await axiosInstance.post(`/users/login`, payload);
     return { status: true, data: response.data };
   } catch (error) {
     return { status: false, error: getErrorMessage(error) };
@@ -29,18 +26,12 @@ export const loginUser = async (payload: any): Promise<ApiResponse> => {
 };
 
 // logout user
-export const logoutUser = async (payload: {
-  accessToken: string;
-}): Promise<LogoutResponse> => {
+export const logoutUser = async (payload: any) => {
   const headers = {
     Authorization: `Bearer ${payload.accessToken}`,
   };
   try {
-    await axiosInstance.post(
-      `${process.env.REACT_APP_BASE_URL}/users/logout`,
-      {},
-      { headers }
-    );
+    await axiosInstance.post(`${baseUrl}/users/logout`, {}, { headers });
     return { status: true };
   } catch (error: any) {
     return { status: false, error: error.message };

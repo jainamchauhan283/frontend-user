@@ -2,7 +2,11 @@ import React, { useState, ChangeEvent, useEffect } from "react";
 import { Box, Card, TextField, Button, Typography, Input } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { addUser } from "../services/apiServices";
-import { showSuccessToast, showErrorToast, logToConsole } from "../utils/utilities";
+import {
+  showSuccessToast,
+  showErrorToast,
+  logToConsole,
+} from "../utils/utilities";
 import { MESSAGES } from "../utils/constants";
 
 const AddUser: React.FC = () => {

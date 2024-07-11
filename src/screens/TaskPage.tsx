@@ -78,7 +78,7 @@ const TaskPage: React.FC = () => {
       window.removeEventListener("offline", handleOffline);
     };
   }, [accessToken, navigate]);
-
+  // eslint-disable-next-line
   const fetchUserTasks = async () => {
     if (!isOnline) {
       setTasks([]); // Clear tasks when offline
@@ -132,7 +132,7 @@ const TaskPage: React.FC = () => {
     try {
       const { status, data } = await addTask(payload);
       if (status) {
-        setTasks([...tasks, data.task]);
+        setTasks([...tasks, data.data.task]);
         setTaskName("");
         showSuccessToast(MESSAGES.ADD_TASK_SUCCESS);
       } else {
@@ -303,7 +303,7 @@ const TaskPage: React.FC = () => {
           <Typography variant="h6" color="error" sx={{ mt: 3 }}>
             You are offline. Please check your internet connection.
           </Typography>
-        ) :tasks.length > 0 ? (
+        ) : tasks.length > 0 ? (
           tasks.map((task) => (
             <Card
               key={task._id}
@@ -338,7 +338,7 @@ const TaskPage: React.FC = () => {
               </ButtonGroup>
             </Card>
           ))
-        ): (
+        ) : (
           <Typography variant="body1" sx={{ mt: 3 }}>
             No tasks available.
           </Typography>

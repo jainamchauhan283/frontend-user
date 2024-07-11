@@ -97,13 +97,13 @@ const LoginPage: React.FC = () => {
       const payload = { email, password };
       const { status, data } = await loginUser(payload);
 
-      if (status && data && data.user) {
+      if (status && data && data.data && data.data.user) {
         // Dispatch form data to Redux or handle data as needed
         dispatch(
           setFormData({
-            username: data.user.userName,
-            email: data.user.userEmail,
-            accessToken: data.accessToken,
+            username: data.data.user.userName,
+            email: data.data.user.userEmail,
+            accessToken: data.data.accessToken,
           })
         );
 
