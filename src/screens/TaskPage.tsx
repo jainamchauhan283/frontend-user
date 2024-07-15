@@ -130,18 +130,9 @@ const TaskPage: React.FC = () => {
     };
 
     try {
-      // const { status, data } = await addTask(payload);
-      // if (status) {
-      //   setTasks([...tasks, data.data.task]);
-      //   setTaskName("");
-      //   showSuccessToast(MESSAGES.ADD_TASK_SUCCESS);
-      // } else {
-      //   setError("Failed to add task");
-      //   showErrorToast(MESSAGES.ADD_TASK_FAILURE);
-      // }
       const { status, data } = await addTask(payload);
-      if (status && data) {
-        setTasks([...tasks, data.data]);
+      if (status) {
+        setTasks([...tasks, data.data.task]);
         setTaskName("");
         showSuccessToast(MESSAGES.ADD_TASK_SUCCESS);
       } else {
@@ -171,8 +162,8 @@ const TaskPage: React.FC = () => {
       accessToken: accessToken,
     };
     try {
-      const { status, data } = await updateTask(payload);
-      if (status && data) {
+      const { status } = await updateTask(payload);
+      if (status) {
         setEditMode(false);
         setEditTaskId("");
         setTaskName("");
@@ -208,13 +199,12 @@ const TaskPage: React.FC = () => {
       accessToken: accessToken,
     };
     try {
-      const { status, data } = await deleteTask(payload);
-      if (status && data) {
+      const { status } = await deleteTask(payload);
+      if (status) {
         setTasks(tasks.filter((task) => task._id !== deleteTaskId));
         setDeleteDialogOpen(false);
         showSuccessToast(MESSAGES.DELETE_TASK_SUCCESS);
       } else {
-        setError("Failed to delete task");
         showErrorToast(MESSAGES.DELETE_TASK_FAILURE);
       }
     } catch (error) {

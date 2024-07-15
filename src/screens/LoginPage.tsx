@@ -97,18 +97,19 @@ const LoginPage: React.FC = () => {
       const payload = { email, password };
       const { status, data } = await loginUser(payload);
 
-      if (status && data && data.user) {
+      if (status && data && data.data && data.data.user) {
         // Dispatch form data to Redux or handle data as needed
         dispatch(
           setFormData({
-            username: data.user.userName,
-            email: data.user.userEmail,
-            accessToken: data.accessToken,
+            username: data.data.user.userName,
+            email: data.data.user.userEmail,
+            accessToken: data.data.accessToken,
           })
         );
+
         showSuccessToast(MESSAGES.LOGIN_SUCCESS); // Show success toast
         setTimeout(() => {
-          console.log("Navigating to /task");
+          // Navigate to TaskPage
           navigate("/task", { replace: true });
           setLoading(false); // Stop loading after navigation
         }, 1000);
@@ -118,7 +119,6 @@ const LoginPage: React.FC = () => {
         setLoading(false); // Stop loading on error
       }
     } catch (error) {
-      console.error("Login process error:", error);
       setError(getErrorMessage(error));
       setLoading(false); // Stop loading on error
     }
