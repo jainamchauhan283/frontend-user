@@ -1,3 +1,8 @@
+import { AddUserResponse } from "../interfaces/responses/addUserResponse";
+import {
+  LoginPayload,
+  LoginResponse,
+} from "../interfaces/responses/loginResponse";
 import axiosInstance from "./api";
 
 const baseUrl = process.env.REACT_APP_BASE_URL;
@@ -11,16 +16,42 @@ const getErrorMessage = (error: unknown): string => {
 };
 
 // login user
-export const loginUser = async (payload: any) => {
-  console.log(baseUrl);
-  payload = {
+// export const loginUser = async (payload: any) => {
+//   console.log(baseUrl);
+//   payload = {
+//     userEmail: payload.email,
+//     userPassword: payload.password,
+//   };
+//   try {
+//     const response = await axiosInstance.post(`/users/login`, payload);
+//     return { status: true, data: response.data };
+//   } catch (error) {
+//     return { status: false, error: getErrorMessage(error) };
+//   }
+// };
+export const loginUser = async (payload: LoginPayload) => {
+  const requestPayload = {
     userEmail: payload.email,
     userPassword: payload.password,
   };
+
   try {
-    const response = await axiosInstance.post(`/users/login`, payload);
-    return { status: true, data: response.data };
-  } catch (error) {
+    console.log("Sending login request with payload:", requestPayload);
+    const response = await axiosInstance.post<LoginResponse>(
+      `/users/login`,
+      requestPayload
+    );
+    console.log("Login response data:", response.data);
+
+    // Ensure response.data matches the expected format
+    if (response.data && response.data.data) {
+      return { status: true, data: response.data.data };
+    } else {
+      console.error("Unexpected response format:", response.data);
+      return { status: false, error: "Unexpected response format" };
+    }
+  } catch (error: any) {
+    console.error("Login error:", error);
     return { status: false, error: getErrorMessage(error) };
   }
 };
@@ -41,11 +72,16 @@ export const logoutUser = async (payload: any) => {
 // add user
 export const addUser = async (formData: FormData) => {
   try {
-    const response = await axiosInstance.post(
+    const response = await axiosInstance.post<AddUserResponse>(
       `${baseUrl}/users/post`,
       formData
     );
-    return { status: true, data: response.data };
+    // return { status: true, data: response.data };
+    if (response.data) {
+      return { status: true, data: response.data };
+    } else {
+      return { status: false, error: "Unexpected response format" };
+    }
   } catch (error: any) {
     return { status: false, error: error.message };
   }
