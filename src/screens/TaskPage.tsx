@@ -32,6 +32,8 @@ import {
 } from "../services/apiServices";
 import { MESSAGES } from "../utils/constants";
 import { showSuccessToast, showErrorToast } from "../utils/utilities";
+import { AddTaskPayload } from "../interfaces/payload/addTaskPayload";
+import { EditTaskPayload } from "../interfaces/payload/editTaskPayload";
 
 const TaskPage: React.FC = () => {
   const navigate = useNavigate();
@@ -124,15 +126,15 @@ const TaskPage: React.FC = () => {
 
     setLoading(true);
     setError("");
-    const payload = {
+    const payload: AddTaskPayload = {
       taskName,
       accessToken,
     };
 
     try {
       const { status, data } = await addTask(payload);
-      if (status) {
-        setTasks([...tasks, data.data.task]);
+      if (status && data) {
+        setTasks([...tasks, data.data?.task]);
         setTaskName("");
         showSuccessToast(MESSAGES.ADD_TASK_SUCCESS);
       } else {
@@ -156,7 +158,7 @@ const TaskPage: React.FC = () => {
   const handleDoneEdit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    const payload = {
+    const payload: EditTaskPayload = {
       taskId: editTaskId,
       taskName: taskName,
       accessToken: accessToken,

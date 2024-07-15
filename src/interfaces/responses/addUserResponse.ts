@@ -1,4 +1,4 @@
-import { User } from "../models/UserModel";
+import { User } from "../models/User";
 
 export interface UserAdd {
   message: string;

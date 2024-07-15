@@ -1,8 +1,10 @@
+import { AddTaskPayload } from "../interfaces/payload/addTaskPayload";
+import { EditTaskPayload } from "../interfaces/payload/editTaskPayload";
+import { LoginPayload } from "../interfaces/payload/loginPayload";
+import { AddTaskResponse } from "../interfaces/responses/addTaskResponse";
 import { AddUserResponse } from "../interfaces/responses/addUserResponse";
-import {
-  LoginPayload,
-  LoginResponse,
-} from "../interfaces/responses/loginResponse";
+import { EditTaskResponse } from "../interfaces/responses/editTaskResponse";
+import { LoginResponse } from "../interfaces/responses/loginResponse";
 import axiosInstance from "./api";
 
 const baseUrl = process.env.REACT_APP_BASE_URL;
@@ -102,12 +104,12 @@ export const fetchTasks = async (accessToken: string) => {
 };
 
 // Add task
-export const addTask = async (payload: any) => {
+export const addTask = async (payload: AddTaskPayload) => {
   try {
     const body = {
       taskName: payload.taskName,
     };
-    const response = await axiosInstance.post(
+    const response = await axiosInstance.post<AddTaskResponse>(
       `${baseUrl}/api/post/tasks`,
       body,
       {
@@ -123,17 +125,21 @@ export const addTask = async (payload: any) => {
 };
 
 // Update task
-export const updateTask = async (payload: any) => {
+export const updateTask = async (payload: EditTaskPayload) => {
   const body = {
     taskId: payload.taskId,
     taskName: payload.taskName,
   };
   try {
-    await axiosInstance.patch(`${baseUrl}/api/update/${body.taskId}`, body, {
-      headers: {
-        Authorization: `Bearer ${payload.accessToken}`,
-      },
-    });
+    await axiosInstance.patch<EditTaskResponse>(
+      `${baseUrl}/api/update/${body.taskId}`,
+      body,
+      {
+        headers: {
+          Authorization: `Bearer ${payload.accessToken}`,
+        },
+      }
+    );
     return { status: true };
   } catch (error) {
     return { status: false, error: getErrorMessage(error) };
