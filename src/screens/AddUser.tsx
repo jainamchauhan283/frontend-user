@@ -273,7 +273,7 @@ const AddUser: React.FC = () => {
             {confirmPasswordError}
           </span>
         )}
-        <Input
+        {/* <Input
           fullWidth
           type="file"
           sx={{
@@ -286,7 +286,7 @@ const AddUser: React.FC = () => {
         />
         {imageError && (
           <span style={{ color: "red", marginTop: 4 }}>{imageError}</span>
-        )}
+        )} */}
         {error && <Typography color="error">{error}</Typography>}
         {/* <Box
           sx={{
