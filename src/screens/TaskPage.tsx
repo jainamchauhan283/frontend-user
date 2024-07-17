@@ -242,7 +242,13 @@ const TaskPage: React.FC = () => {
       <AppBar position="static" color="inherit">
         <Toolbar>
           <Typography variant="h5">Hello, {userName}</Typography>{" "}
-          <Button onClick={handleLogout}>Logout</Button>
+          <Box sx={{ flexGrow: 1 }} />
+          <Button variant="outlined" color="error" sx={{ marginRight: 2 }}>
+            Subscribed Now
+          </Button>
+          <Button variant="contained" onClick={handleLogout}>
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
       <Box

@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
-import { Box, Card, TextField, Button, Typography, Input } from "@mui/material";
+import { Box, Card, TextField, Button, Typography, Input, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { addUser } from "../services/apiServices";
 import {
@@ -25,6 +25,7 @@ const AddUser: React.FC = () => {
   const [imageError, setImageError] = useState("");
   const [error, setError] = useState("");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -154,7 +155,7 @@ const AddUser: React.FC = () => {
     if (image) {
       formData.append("userImage", image);
     }
-
+    setLoading(true);
     try {
       const { status, data, error } = await addUser(formData);
 
@@ -163,6 +164,7 @@ const AddUser: React.FC = () => {
         // console.log("User added:", data);
         showSuccessToast(MESSAGES.REGISTRATION_SUCCESS);
         navigate("/login", { replace: true });
+        setLoading(false);
       } else {
         if (error === "This Email already exists") {
           setEmailError(MESSAGES.EMAIL_EXISTS);
@@ -170,11 +172,13 @@ const AddUser: React.FC = () => {
           logToConsole("Error adding data", error);
           setError(MESSAGES.SOMETHING_WENT_WRONG);
         }
+        setLoading(false);
       }
     } catch (error: any) {
       logToConsole("Error adding data", error);
       // setError("Something went wrong. Please try again.");
       setError(error.message);
+      setLoading(false);
     }
   };
 
@@ -322,8 +326,10 @@ const AddUser: React.FC = () => {
           fullWidth
           color="primary"
           onClick={handleAddUser}
+          disabled={loading}
         >
-          Register
+          {/* Register */}
+          {loading ? <CircularProgress size={24} /> : "Register"}
         </Button>
         <Box mt={1}>
           <span>Already have an account? </span>
