@@ -1,3 +1,4 @@
+// Ex. Libraries
 import {
   Box,
   Button,
@@ -10,13 +11,17 @@ import {
 } from "@mui/material";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { setFormData } from "../redux/reducer";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+// Redux
+import { setFormData } from "../redux/reducer";
+// Services
 import { loginUser } from "../services/apiServices";
+// Utils
 import { MESSAGES } from "../utils/constants";
 import { showSuccessToast, showErrorToast } from "../utils/utilities";
+import { getErrorMessage } from "../utils/errorUtils";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -43,13 +48,6 @@ const LoginPage: React.FC = () => {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
-
-  const getErrorMessage = (error: unknown): string => {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return String(error);
-  };
 
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
@@ -79,9 +77,54 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  // const handleLogin = async () => {
+  //   if (!isOnline) {
+  //     showErrorToast(MESSAGES.OFFLINE_ERROR); // Show no internet toast
+  //     return;
+  //   }
+
+  //   if (!email || !password) {
+  //     setEmailError(!email ? MESSAGES.ENTER_EMAIL : "");
+  //     setPasswordError(!password ? MESSAGES.ENTER_PASSWORD : "");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+
+  //   try {
+  //     const payload = { email, password };
+  //     const { status, data } = await loginUser(payload);
+
+  //     if (status && data && data.user) {
+  //       // Dispatch form data to Redux or handle data as needed
+  //       dispatch(
+  //         setFormData({
+  //           username: data.user.userName,
+  //           email: data.user.userEmail,
+  //           accessToken: data.accessToken,
+  //         })
+  //       );
+
+  //       showSuccessToast(MESSAGES.LOGIN_SUCCESS); // Show success toast
+  //       setTimeout(() => {
+  //         // Navigate to TaskPage
+  //         navigate("/task", { replace: true });
+  //         setLoading(false); // Stop loading after navigation
+  //       }, 1000);
+  //     } else {
+  //       // Handle unsuccessful login
+  //       setError(MESSAGES.INVALID_CREDENTIAL);
+  //       setLoading(false); // Stop loading on error
+  //     }
+  //   } catch (error) {
+  //     setError(getErrorMessage(error));
+  //     setLoading(false); // Stop loading on error
+  //   }
+  // };
+
   const handleLogin = async () => {
     if (!isOnline) {
-      showErrorToast(MESSAGES.OFFLINE_ERROR); // Show no internet toast
+      showErrorToast(MESSAGES.OFFLINE_ERROR);
       return;
     }
 
@@ -97,30 +140,33 @@ const LoginPage: React.FC = () => {
       const payload = { email, password };
       const { status, data } = await loginUser(payload);
 
-      if (status && data && data && data.user) {
-        // Dispatch form data to Redux or handle data as needed
+      if (status && data && data.user) {
+        const { user, accessToken } = data;
+
+        // Dispatch form data to Redux
         dispatch(
           setFormData({
-            username: data.user.userName,
-            email: data.user.userEmail,
-            accessToken: data.accessToken,
+            username: user.userName,
+            email: user.userEmail,
+            accessToken: accessToken,
+            userId: user._id, // Store user ID
           })
         );
 
-        showSuccessToast(MESSAGES.LOGIN_SUCCESS); // Show success toast
+        showSuccessToast(MESSAGES.LOGIN_SUCCESS);
+
         setTimeout(() => {
-          // Navigate to TaskPage
-          navigate("/task", { replace: true });
-          setLoading(false); // Stop loading after navigation
+          // Navigate to TaskPage with userId as state
+          navigate("/task", { replace: true, state: { userId: user._id } });
+          setLoading(false);
         }, 1000);
       } else {
-        // Handle unsuccessful login
         setError(MESSAGES.INVALID_CREDENTIAL);
-        setLoading(false); // Stop loading on error
+        setLoading(false);
       }
     } catch (error) {
       setError(getErrorMessage(error));
-      setLoading(false); // Stop loading on error
+      setLoading(false);
     }
   };
 

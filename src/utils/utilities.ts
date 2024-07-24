@@ -1,3 +1,4 @@
+// Ex. Libraries
 import { toast } from "react-hot-toast";
 
 export const showSuccessToast = (message: string, duration: number = 2000) => {

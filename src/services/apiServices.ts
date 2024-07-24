@@ -1,21 +1,18 @@
+// Payload
 import { AddTaskPayload } from "../interfaces/payload/addTaskPayload";
 import { EditTaskPayload } from "../interfaces/payload/editTaskPayload";
 import { LoginPayload } from "../interfaces/payload/loginPayload";
+// Responses
 import { AddTaskResponse } from "../interfaces/responses/addTaskResponse";
 import { AddUserResponse } from "../interfaces/responses/addUserResponse";
 import { EditTaskResponse } from "../interfaces/responses/editTaskResponse";
 import { LoginResponse } from "../interfaces/responses/loginResponse";
+// Utils
+import { getErrorMessage } from "../utils/errorUtils";
+// Services
 import axiosInstance from "./api";
 
 const baseUrl = process.env.REACT_APP_BASE_URL;
-
-// Helper function to extract error message
-const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return String(error);
-};
 
 // login user
 // export const loginUser = async (payload: any) => {
@@ -52,7 +49,7 @@ export const loginUser = async (payload: LoginPayload) => {
       console.error("Unexpected response format:", response.data);
       return { status: false, error: "Unexpected response format" };
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error("Login error:", error);
     return { status: false, error: getErrorMessage(error) };
   }
@@ -66,8 +63,8 @@ export const logoutUser = async (payload: any) => {
   try {
     await axiosInstance.post(`${baseUrl}/users/logout`, {}, { headers });
     return { status: true };
-  } catch (error: any) {
-    return { status: false, error: error.message };
+  } catch (error) {
+    return { status: false, error: getErrorMessage(error) };
   }
 };
 
@@ -84,8 +81,8 @@ export const addUser = async (formData: FormData) => {
     } else {
       return { status: false, error: "Unexpected response format" };
     }
-  } catch (error: any) {
-    return { status: false, error: error.message };
+  } catch (error) {
+    return { status: false, error: getErrorMessage(error) };
   }
 };
 
@@ -98,8 +95,8 @@ export const fetchTasks = async (accessToken: string) => {
       },
     });
     return { status: true, data: response.data };
-  } catch (error: any) {
-    return { status: false, error: error.message };
+  } catch (error) {
+    return { status: false, error: getErrorMessage(error) };
   }
 };
 
@@ -159,3 +156,39 @@ export const deleteTask = async (payload: any) => {
     return { status: false, error: getErrorMessage(error) };
   }
 };
+
+// // Function to create a new order
+// export const createOrder = async (amount: number, accessToken: string) => {
+//   try {
+//     const response = await axiosInstance.post(
+//       `${baseUrl}/payments/create`,
+//       { amount },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//       }
+//     );
+//     return { status: true, data: response.data };
+//   } catch (error) {
+//     return { status: false, error: getErrorMessage(error) };
+//   }
+// };
+
+// // Function to verify payment
+// export const verifyPayment = async (paymentData: any, accessToken: string) => {
+//   try {
+//     const response = await axiosInstance.post(
+//       `${baseUrl}/payments/verify`,
+//       paymentData,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//       }
+//     );
+//     return { status: true, data: response.data };
+//   } catch (error) {
+//     return { status: false, error: getErrorMessage(error) };
+//   }
+// };

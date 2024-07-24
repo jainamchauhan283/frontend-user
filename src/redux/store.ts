@@ -1,7 +1,9 @@
+// Ex. Libraries
 import { configureStore } from "@reduxjs/toolkit";
-import formReducer from "./reducer";
 import storage from "redux-persist/lib/storage";
 import { persistStore, persistReducer } from "redux-persist";
+// reducer
+import formReducer from "./reducer";
 
 const persistConfig = {
   key: "root",

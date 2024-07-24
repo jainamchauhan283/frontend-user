@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+// Ex. Libraries
 import {
   AppBar,
   Box,
@@ -19,10 +20,12 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { clearFormData } from "../redux/reducer";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DoneIcon from "@mui/icons-material/Done";
+// Redux
+import { clearFormData } from "../redux/reducer";
+// Services
 import {
   addTask,
   deleteTask,
@@ -30,8 +33,12 @@ import {
   logoutUser,
   updateTask,
 } from "../services/apiServices";
+import axiosInstance from "../services/api";
+// Utils
 import { MESSAGES } from "../utils/constants";
+import { getErrorMessage } from "../utils/errorUtils";
 import { showSuccessToast, showErrorToast } from "../utils/utilities";
+// Interfaces
 import { AddTaskPayload } from "../interfaces/payload/addTaskPayload";
 import { EditTaskPayload } from "../interfaces/payload/editTaskPayload";
 
@@ -50,13 +57,6 @@ const TaskPage: React.FC = () => {
   const [deleteTaskId, setDeleteTaskId] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  const getErrorMessage = (error: unknown): string => {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return String(error);
-  };
 
   useEffect(() => {
     if (!accessToken) {
@@ -237,13 +237,93 @@ const TaskPage: React.FC = () => {
     setLoading(false);
   };
 
+  const handlePayment = async () => {
+    try {
+      // Call your backend to create a new order
+      const { data } = await axiosInstance.post(
+        "http://localhost:5000/payments/create",
+        { amount: 50 },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      const { amount, id: order_id, currency } = data.data;
+      const options = {
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+        amount: amount.toString(),
+        currency: currency,
+        name: "Task Manager",
+        description: "Subscription Payment",
+        order_id: order_id,
+        handler: async function (response: {
+          razorpay_payment_id: any;
+          razorpay_order_id: any;
+          razorpay_signature: any;
+        }) {
+          try {
+            const paymentData = {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            };
+            // Verify the payment on the backend
+            const result = await axiosInstance.post(
+              "http://localhost:5000/payments/verify",
+              paymentData,
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              }
+            );
+            showSuccessToast("Payment Successful");
+          } catch (error) {
+            console.error("Payment verification error:", error);
+            showErrorToast("Payment verification failed");
+          }
+        },
+        prefill: {
+          name: "Jainam Chauhan",
+          email: "jainam.chauhan.311@gmail.com",
+          contact: "7096665228",
+        },
+        notes: {
+          address: "Razorpay Corporate Office",
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on(
+        "payment.failed",
+        function (response: { error: { description: any } }) {
+          showErrorToast(`Payment failed: ${response.error.description}`);
+        }
+      );
+
+      rzp.open();
+    } catch (error) {
+      console.error("Error creating order:", error);
+      showErrorToast("Error initiating payment");
+    }
+  };
+
   return (
     <>
       <AppBar position="static" color="inherit">
         <Toolbar>
           <Typography variant="h5">Hello, {userName}</Typography>{" "}
           <Box sx={{ flexGrow: 1 }} />
-          <Button variant="outlined" color="error" sx={{ marginRight: 2 }}>
+          <Button
+            variant="outlined"
+            color="error"
+            sx={{ marginRight: 2 }}
+            onClick={handlePayment}
+          >
             Subscribed Now
           </Button>
           <Button variant="contained" onClick={handleLogout}>

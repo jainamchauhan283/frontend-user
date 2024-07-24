@@ -1,7 +1,10 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
-import { Box, Card, TextField, Button, Typography, Input, CircularProgress } from "@mui/material";
+// Ex. Libraries
+import { Box, Card, TextField, Button, Typography, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+// Services
 import { addUser } from "../services/apiServices";
+// Utils
 import {
   showSuccessToast,
   showErrorToast,
