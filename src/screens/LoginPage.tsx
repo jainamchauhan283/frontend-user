@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 // Redux
-import { setFormData } from "../redux/reducer";
+import { setAccessToken, setUserData, setPaymentData } from "../redux/reducer";
 // Services
 import { loginUser } from "../services/apiServices";
 // Utils
@@ -141,23 +141,19 @@ const LoginPage: React.FC = () => {
       const { status, data } = await loginUser(payload);
 
       if (status && data && data.user) {
-        const { user, accessToken } = data;
+        const { user, accessToken, payment } = data;
 
         // Dispatch form data to Redux
-        dispatch(
-          setFormData({
-            username: user.userName,
-            email: user.userEmail,
-            accessToken: accessToken,
-            userId: user._id, // Store user ID
-          })
-        );
-
+        dispatch(setAccessToken(accessToken));
+        dispatch(setUserData(user));
+        dispatch(setPaymentData(payment));
         showSuccessToast(MESSAGES.LOGIN_SUCCESS);
-
         setTimeout(() => {
           // Navigate to TaskPage with userId as state
-          navigate("/task", { replace: true, state: { userId: user._id } });
+          navigate("/task", {
+            replace: true,
+            state: { userId: user._id, paymentData: payment },
+          });
           setLoading(false);
         }, 1000);
       } else {

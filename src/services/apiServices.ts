@@ -157,38 +157,56 @@ export const deleteTask = async (payload: any) => {
   }
 };
 
-// // Function to create a new order
-// export const createOrder = async (amount: number, accessToken: string) => {
-//   try {
-//     const response = await axiosInstance.post(
-//       `${baseUrl}/payments/create`,
-//       { amount },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${accessToken}`,
-//         },
-//       }
-//     );
-//     return { status: true, data: response.data };
-//   } catch (error) {
-//     return { status: false, error: getErrorMessage(error) };
-//   }
-// };
+// find user and payment
+export const fetchUserAndPayment = async (accessToken: string) => {
+  try {
+    const response = await axiosInstance.get(`${baseUrl}/users/findone`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return {
+      user: response.data.user,
+      payment: response.data.payment,
+    };
+  } catch (error: unknown) {
+    console.error("Error fetching user and payment:", error);
+    throw new Error(getErrorMessage(error));
+  }
+};
 
-// // Function to verify payment
-// export const verifyPayment = async (paymentData: any, accessToken: string) => {
-//   try {
-//     const response = await axiosInstance.post(
-//       `${baseUrl}/payments/verify`,
-//       paymentData,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${accessToken}`,
-//         },
-//       }
-//     );
-//     return { status: true, data: response.data };
-//   } catch (error) {
-//     return { status: false, error: getErrorMessage(error) };
-//   }
-// };
+// Function to create a new payment order
+export const createOrder = async (accessToken: any, amount: any) => {
+  try {
+    const { data } = await axiosInstance.post(
+      `${baseUrl}/payments/create`,
+      { amount },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    return data.data; // Assuming data.data contains { amount, id, currency }
+  } catch (error) {
+    throw error; // Handle errors in the calling function
+  }
+};
+
+// Function to verify the payment
+export const verifyPayment = async (accessToken: any, paymentData: any) => {
+  try {
+    const { data } = await axiosInstance.post(
+      `${baseUrl}/payments/verify`,
+      paymentData,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    return data; // Assuming your backend returns success/failure response
+  } catch (error) {
+    throw error; // Handle errors in the calling function
+  }
+};

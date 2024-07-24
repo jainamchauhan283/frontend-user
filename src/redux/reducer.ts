@@ -1,15 +1,16 @@
 // Ex. Libraries
 import { createSlice } from "@reduxjs/toolkit";
+import { User } from "../interfaces/models/User";
 
 interface FormState {
-  username: string;
-  email: string;
+  user: User | null;
+  payment: any;
   accessToken: string | null;
 }
 
 const initialState: FormState = {
-  username: "",
-  email: "",
+  user: null,
+  payment: null,
   accessToken: null,
 };
 
@@ -17,18 +18,21 @@ const formSlice = createSlice({
   name: "form",
   initialState,
   reducers: {
-    setFormData: (state, action) => {
-      state.username = action.payload.username;
-      state.email = action.payload.email;
-      state.accessToken = action.payload.accessToken;
+    setUserData: (state, action) => {
+      state.user = action.payload;
     },
-    clearFormData: (state) => {
-      state.username = "";
-      state.email = "";
-      state.accessToken = null;
+    setPaymentData: (state, action) => {
+      state.payment = action.payload;
+    },
+    setAccessToken: (state, action) => {
+      state.accessToken = action.payload;
+    },
+    logoutFormData: (state) => {
+      state = initialState;
     },
   },
 });
 
-export const { setFormData, clearFormData } = formSlice.actions;
+export const { setUserData, setAccessToken, setPaymentData, logoutFormData } =
+  formSlice.actions;
 export default formSlice.reducer;

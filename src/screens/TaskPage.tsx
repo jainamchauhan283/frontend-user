@@ -24,12 +24,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DoneIcon from "@mui/icons-material/Done";
 // Redux
-import { clearFormData } from "../redux/reducer";
+import { logoutFormData } from "../redux/reducer";
 // Services
 import {
   addTask,
   deleteTask,
   fetchTasks,
+  fetchUserAndPayment,
   logoutUser,
   updateTask,
 } from "../services/apiServices";
@@ -46,14 +47,18 @@ const TaskPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const accessToken = useSelector((state: any) => state.form.accessToken);
-  const userName = useSelector((state: any) => state.form.username);
+  // const user = useSelector((state: any) => state.form.user);
+  // const payment = useSelector((state: any) => state.form.payment);
+
+  const [user, setUser] = useState<any>(null);
+  const [payment, setPayment] = useState<any>(null);
 
   const [taskName, setTaskName] = useState("");
   const [error, setError] = useState("");
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [editMode, setEditMode] = useState(false); // State to manage edit mode
-  const [editTaskId, setEditTaskId] = useState(""); // State to store task ID being edited
+  const [editMode, setEditMode] = useState(false);
+  const [editTaskId, setEditTaskId] = useState("");
   const [deleteTaskId, setDeleteTaskId] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -62,6 +67,7 @@ const TaskPage: React.FC = () => {
     if (!accessToken) {
       navigate("/login", { replace: true });
     } else {
+      fetchUserData();
       fetchUserTasks();
     }
     const handleOnline = () => {
@@ -80,7 +86,20 @@ const TaskPage: React.FC = () => {
       window.removeEventListener("offline", handleOffline);
     };
   }, [accessToken, navigate]);
-  // eslint-disable-next-line
+
+  const fetchUserData = async () => {
+    if (!isOnline) return;
+
+    try {
+      const { user, payment } = await fetchUserAndPayment(accessToken);
+      setUser(user);
+      setPayment(payment);
+    } catch (error: unknown) {
+      setError(getErrorMessage(error));
+      console.error("Failed to fetch user and payment data:", error);
+    }
+  };
+
   const fetchUserTasks = async () => {
     if (!isOnline) {
       setTasks([]); // Clear tasks when offline
@@ -106,6 +125,7 @@ const TaskPage: React.FC = () => {
 
   const handleAddTask = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const isSubscriptionActive = !!payment;
     if (!isOnline) {
       showErrorToast(MESSAGES.OFFLINE_ADD_TASK_ERROR);
       return;
@@ -113,6 +133,10 @@ const TaskPage: React.FC = () => {
     if (taskName.trim() === "") {
       setError(MESSAGES.ENTER_TASK);
       setLoading(false);
+      return;
+    }
+    if (!isSubscriptionActive && tasks.length >= 5) {
+      showErrorToast("Task limit reached. Please subscribe to add more tasks.");
       return;
     }
     if (
@@ -226,7 +250,7 @@ const TaskPage: React.FC = () => {
     try {
       const { status } = await logoutUser(accessToken);
       if (status) {
-        dispatch(clearFormData());
+        dispatch(logoutFormData());
         showSuccessToast(MESSAGES.LOG_OUT_SUCCESS);
         navigate("/login", { replace: true });
       }
@@ -269,7 +293,8 @@ const TaskPage: React.FC = () => {
               razorpay_signature: response.razorpay_signature,
             };
             // Verify the payment on the backend
-            const result = await axiosInstance.post(
+            // const result = await axiosInstance.post(
+            await axiosInstance.post(
               "http://localhost:5000/payments/verify",
               paymentData,
               {
@@ -279,6 +304,7 @@ const TaskPage: React.FC = () => {
               }
             );
             showSuccessToast("Payment Successful");
+            window.location.reload();
           } catch (error) {
             console.error("Payment verification error:", error);
             showErrorToast("Payment verification failed");
@@ -316,16 +342,22 @@ const TaskPage: React.FC = () => {
     <>
       <AppBar position="static" color="inherit">
         <Toolbar>
-          <Typography variant="h5">Hello, {userName}</Typography>{" "}
+          <Typography variant="h5">Hello, {user?.userName}</Typography>
           <Box sx={{ flexGrow: 1 }} />
-          <Button
-            variant="outlined"
-            color="error"
-            sx={{ marginRight: 2 }}
-            onClick={handlePayment}
-          >
-            Subscribed Now
-          </Button>
+          {!payment && (
+            <Button
+              variant="outlined"
+              color="error"
+              sx={{ marginRight: 2 }}
+              onClick={handlePayment}
+            >
+              Subscribe Now
+            </Button>
+          )}
+
+          {payment && (
+            <Typography variant="h6">You have active subscription</Typography>
+          )}
           <Button variant="contained" onClick={handleLogout}>
             Logout
           </Button>
