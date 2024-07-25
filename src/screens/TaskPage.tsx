@@ -94,7 +94,7 @@ const TaskPage: React.FC = () => {
       const { user, payment } = await fetchUserAndPayment(accessToken);
       setUser(user);
       setPayment(payment);
-    } catch (error: unknown) {
+    } catch (error) {
       setError(getErrorMessage(error));
       console.error("Failed to fetch user and payment data:", error);
     }
@@ -116,7 +116,7 @@ const TaskPage: React.FC = () => {
           navigate("/login", { replace: true });
         }
       }
-    } catch (error: unknown) {
+    } catch (error) {
       setError(getErrorMessage(error));
       console.error("Failed to fetch tasks:", error);
     }
@@ -165,7 +165,7 @@ const TaskPage: React.FC = () => {
         setError("Failed to add task");
         showErrorToast(MESSAGES.ADD_TASK_FAILURE);
       }
-    } catch (error: unknown) {
+    } catch (error) {
       setError(getErrorMessage(error));
       showErrorToast(MESSAGES.ADD_TASK_FAILURE);
       console.error(error);
@@ -199,7 +199,7 @@ const TaskPage: React.FC = () => {
         setError("Failed to update task");
         showErrorToast(MESSAGES.UPDATE_TASK_FAILURE);
       }
-    } catch (error: unknown) {
+    } catch (error) {
       setError(getErrorMessage(error));
       showErrorToast(MESSAGES.UPDATE_TASK_FAILURE);
       console.error(error);

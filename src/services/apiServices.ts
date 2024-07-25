@@ -169,7 +169,7 @@ export const fetchUserAndPayment = async (accessToken: string) => {
       user: response.data.user,
       payment: response.data.payment,
     };
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("Error fetching user and payment:", error);
     throw new Error(getErrorMessage(error));
   }
