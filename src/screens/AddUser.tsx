@@ -24,8 +24,8 @@ const AddUser: React.FC = () => {
   const [mobileError, setMobileError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [image, setImage] = useState<File | null>(null);
-  const [imageError, setImageError] = useState("");
+  // const [image, setImage] = useState<File | null>(null);
+  // const [imageError, setImageError] = useState("");
   const [error, setError] = useState("");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [loading, setLoading] = useState(false);
@@ -97,14 +97,14 @@ const AddUser: React.FC = () => {
     }
   };
 
-  const onChangeFile = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const selectedFile = files[0];
-      setImage(selectedFile);
-      setImageError("");
-    }
-  };
+  // const onChangeFile = (event: ChangeEvent<HTMLInputElement>) => {
+  //   const files = event.target.files;
+  //   if (files && files.length > 0) {
+  //     const selectedFile = files[0];
+  //     setImage(selectedFile);
+  //     setImageError("");
+  //   }
+  // };
 
   const handleAddUser = async () => {
     if (!isOnline) {
@@ -144,20 +144,20 @@ const AddUser: React.FC = () => {
       setConfirmPasswordError("");
     }
 
-    if (!image) {
-      setImageError(MESSAGES.SELECT_IMAGE);
-    } else {
-      setImageError("");
-    }
+    // if (!image) {
+    //   setImageError(MESSAGES.SELECT_IMAGE);
+    // } else {
+    //   setImageError("");
+    // }
 
     const formData = new FormData();
     formData.append("userName", name);
     formData.append("userEmail", email);
     formData.append("userMobile", mobile);
     formData.append("userPassword", password);
-    if (image) {
-      formData.append("userImage", image);
-    }
+    // if (image) {
+    //   formData.append("userImage", image);
+    // }
     setLoading(true);
     try {
       const { status, data, error } = await addUser(formData);

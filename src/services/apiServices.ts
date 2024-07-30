@@ -105,6 +105,7 @@ export const addTask = async (payload: AddTaskPayload) => {
   try {
     const body = {
       taskName: payload.taskName,
+      taskDescription: payload.taskDescription,
     };
     const response = await axiosInstance.post<AddTaskResponse>(
       `${baseUrl}/api/post/tasks`,
@@ -126,6 +127,7 @@ export const updateTask = async (payload: EditTaskPayload) => {
   const body = {
     taskId: payload.taskId,
     taskName: payload.taskName,
+    taskDescription: payload.taskDescription,
   };
   try {
     await axiosInstance.patch<EditTaskResponse>(

@@ -11,18 +11,15 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
-  IconButton,
+  Fab,
+  Grid,
   InputBase,
-  Paper,
   Toolbar,
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
-import DoneIcon from "@mui/icons-material/Done";
 // Redux
 import { logoutFormData } from "../redux/reducer";
 // Services
@@ -54,6 +51,7 @@ const TaskPage: React.FC = () => {
   const [payment, setPayment] = useState<any>(null);
 
   const [taskName, setTaskName] = useState("");
+  const [taskDescription, settaskDescription] = useState("");
   const [error, setError] = useState("");
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -62,6 +60,8 @@ const TaskPage: React.FC = () => {
   const [deleteTaskId, setDeleteTaskId] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState("");
 
   useEffect(() => {
     if (!accessToken) {
@@ -125,20 +125,23 @@ const TaskPage: React.FC = () => {
 
   const handleAddTask = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const isSubscriptionActive = !!payment;
+    // Check online status
     if (!isOnline) {
       showErrorToast(MESSAGES.OFFLINE_ADD_TASK_ERROR);
       return;
     }
-    if (taskName.trim() === "") {
+    // Validate input fields
+    if (taskName.trim() === "" || taskDescription.trim() === "") {
       setError(MESSAGES.ENTER_TASK);
-      setLoading(false);
       return;
     }
+    // Check subscription limit
+    const isSubscriptionActive = !!payment;
     if (!isSubscriptionActive && tasks.length >= 5) {
       showErrorToast("Task limit reached. Please subscribe to add more tasks.");
       return;
     }
+    // Check for duplicate tasks
     if (
       tasks.some(
         (task) => task.taskName.toLowerCase() === taskName.toLowerCase()
@@ -150,8 +153,10 @@ const TaskPage: React.FC = () => {
 
     setLoading(true);
     setError("");
+
     const payload: AddTaskPayload = {
       taskName,
+      taskDescription,
       accessToken,
     };
 
@@ -159,7 +164,10 @@ const TaskPage: React.FC = () => {
       const { status, data } = await addTask(payload);
       if (status && data) {
         setTasks([...tasks, data.data?.task]);
+        // Clear the input fields
         setTaskName("");
+        settaskDescription("");
+        setOpenDialog(false);
         showSuccessToast(MESSAGES.ADD_TASK_SUCCESS);
       } else {
         setError("Failed to add task");
@@ -170,13 +178,21 @@ const TaskPage: React.FC = () => {
       showErrorToast(MESSAGES.ADD_TASK_FAILURE);
       console.error(error);
     }
+
     setLoading(false);
   };
 
-  const handleEditClick = (taskId: string, currentTaskName: string) => {
+  const handleEditClick = (
+    taskId: string,
+    currentTaskName: string,
+    currenttaskDescription: string
+  ) => {
     setEditTaskId(taskId); // Set the task ID being edited
     setTaskName(currentTaskName); // Set the current task name in the input field
+    settaskDescription(currenttaskDescription); // Set the current task description in the input field
     setEditMode(true); // Enable edit mode
+    setDialogTitle("Edit Task");
+    setOpenDialog(true);
   };
 
   const handleDoneEdit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -185,6 +201,7 @@ const TaskPage: React.FC = () => {
     const payload: EditTaskPayload = {
       taskId: editTaskId,
       taskName: taskName,
+      taskDescription: taskDescription,
       accessToken: accessToken,
     };
     try {
@@ -193,6 +210,8 @@ const TaskPage: React.FC = () => {
         setEditMode(false);
         setEditTaskId("");
         setTaskName("");
+        settaskDescription("");
+        setOpenDialog(false);
         fetchUserTasks();
         showSuccessToast(MESSAGES.UPDATE_TASK_SUCCESS);
       } else {
@@ -207,11 +226,12 @@ const TaskPage: React.FC = () => {
     setLoading(false);
   };
 
-  const handleCancelEdit = () => {
-    setTaskName("");
-    setEditTaskId("");
-    setEditMode(false);
-  };
+  // const handleCancelEdit = () => {
+  //   setTaskName("");
+  //   setEditTaskId("");
+  //   setEditMode(false);
+  //   setOpenDialog(false);
+  // };
 
   const handleDeleteTask = (taskId: string) => {
     setDeleteTaskId(taskId);
@@ -259,6 +279,34 @@ const TaskPage: React.FC = () => {
       console.error(error);
     }
     setLoading(false);
+  };
+
+  const openAddDialog = () => {
+    setOpenDialog(true);
+    setDialogTitle("Add Task");
+    setTaskName("");
+    settaskDescription("");
+  };
+
+  const openEditDialog = (
+    taskId: string,
+    currentTaskName: string,
+    currentTaskDescription: string
+  ) => {
+    setOpenDialog(true);
+    setDialogTitle("Edit Task");
+    setEditTaskId(taskId);
+    setTaskName(currentTaskName);
+    settaskDescription(currentTaskDescription);
+  };
+
+  const closeDialog = () => {
+    setOpenDialog(false);
+    setDialogTitle("");
+    setTaskName("");
+    settaskDescription("");
+    setEditTaskId("");
+    setEditMode(false);
   };
 
   const handlePayment = async () => {
@@ -366,53 +414,12 @@ const TaskPage: React.FC = () => {
       <Box
         sx={{
           m: 3,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          p: 2,
+          // display: "flex",
+          // flexDirection: "column",
+          // alignItems: "center",
         }}
       >
-        <Paper
-          component="form"
-          onSubmit={editMode ? handleDoneEdit : handleAddTask}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-            p: 1,
-          }}
-        >
-          <InputBase
-            sx={{ ml: 1, flex: 1 }}
-            placeholder="Task"
-            inputProps={{ "aria-label": "Task" }}
-            value={taskName}
-            onChange={(e) => setTaskName(e.target.value)}
-          />
-          <IconButton
-            type="button"
-            sx={{ p: "10px" }}
-            onClick={() => {
-              if (editMode) {
-                handleCancelEdit();
-              } else {
-                setTaskName("");
-              }
-            }}
-            aria-label="cancel"
-          >
-            <CloseIcon />
-          </IconButton>
-          <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-          <IconButton
-            type="submit"
-            color="primary"
-            sx={{ p: "10px" }}
-            aria-label={editMode ? "done-edit" : "add-task"}
-          >
-            {editMode ? <DoneIcon /> : <AddIcon />}
-          </IconButton>
-        </Paper>
-
         <Typography variant="body1" color="error" sx={{ mt: 1 }}>
           {error}
         </Typography>
@@ -424,46 +431,165 @@ const TaskPage: React.FC = () => {
             You are offline. Please check your internet connection.
           </Typography>
         ) : tasks.length > 0 ? (
-          tasks.map((task) => (
-            <Card
-              key={task._id}
-              variant="outlined"
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                width: "100%",
-                p: 1,
-                m: 1,
-              }}
-            >
-              <Typography variant="h6" sx={{ ml: 1, flex: 1 }}>
-                {task.taskName}
-              </Typography>
-              <ButtonGroup variant="text" aria-label="Basic button group">
-                {editMode && task._id === editTaskId ? (
-                  <></>
-                ) : (
-                  <Button
-                    onClick={() => handleEditClick(task._id, task.taskName)}
-                  >
-                    Edit
-                  </Button>
-                )}
-                <Button
-                  onClick={() => handleDeleteTask(task._id)}
-                  color="error"
+          // tasks.map((task) => (
+          //   <Card
+          //     key={task._id}
+          //     variant="outlined"
+          //     sx={{
+          //       display: "flex",
+          //       flexDirection: "column",
+          //       width: "100%",
+          //       p: 1,
+          //       m: 1,
+          //     }}
+          //   >
+          //     <Typography variant="h6" sx={{ ml: 1 }}>
+          //       {task.taskName}
+          //     </Typography>
+          //     {task.taskDescription && (
+          //       <Typography
+          //         variant="body2"
+          //         sx={{ ml: 1, mt: 1, color: "text.secondary" }}
+          //       >
+          //         {task.taskDescription}
+          //       </Typography>
+          //     )}
+          //     <ButtonGroup variant="text" aria-label="Basic button group">
+          //       {editMode && task._id === editTaskId ? (
+          //         <></>
+          //       ) : (
+          //         <Button
+          //           onClick={() =>
+          //             handleEditClick(
+          //               task._id,
+          //               task.taskName,
+          //               task.taskDescription
+          //             )
+          //           }
+          //         >
+          //           Edit
+          //         </Button>
+          //       )}
+          //       <Button
+          //         onClick={() => handleDeleteTask(task._id)}
+          //         color="error"
+          //       >
+          //         Delete
+          //       </Button>
+          //     </ButtonGroup>
+          //   </Card>
+          // ))
+          <Grid container spacing={2}>
+            {tasks.map((task) => (
+              <Grid item key={task._id} xs={12} sm={6} md={4} lg={3}>
+                <Card
+                // key={task._id}
+                  variant="outlined"
+                  sx={{
+                    border: "1px solid #3f51b5",
+                    borderRadius: "8px",
+                    transition: "transform 0.2s, box-shadow 0.2s",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                    },
+                    display: "flex",
+                    flexDirection: "column",
+                    p: 2,
+                  }}
                 >
-                  Delete
-                </Button>
-              </ButtonGroup>
-            </Card>
-          ))
+                  <Typography variant="h6" sx={{ ml: 1 }}>
+                    {task.taskName}
+                  </Typography>
+                  {task.taskDescription && (
+                    <Typography
+                      variant="body2"
+                      sx={{ ml: 1, mt: 1, color: "text.secondary" }}
+                    >
+                      {task.taskDescription}
+                    </Typography>
+                  )}
+                  <ButtonGroup variant="text" aria-label="Basic button group">
+                    {editMode && task._id === editTaskId ? (
+                      <></>
+                    ) : (
+                      <Button
+                        onClick={() =>
+                          handleEditClick(
+                            task._id,
+                            task.taskName,
+                            task.taskDescription
+                          )
+                        }
+                      >
+                        Edit
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => handleDeleteTask(task._id)}
+                      color="error"
+                    >
+                      Delete
+                    </Button>
+                  </ButtonGroup>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
         ) : (
           <Typography variant="body1" sx={{ mt: 3 }}>
             No tasks available.
           </Typography>
         )}
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{ position: "fixed", bottom: 16, right: 16 }}
+          onClick={openAddDialog}
+        >
+          <AddIcon />
+        </Fab>
       </Box>
+      <Dialog open={openDialog} onClose={closeDialog}>
+        <DialogTitle>{dialogTitle}</DialogTitle>
+        <DialogContent>
+          <form onSubmit={editMode ? handleDoneEdit : handleAddTask}>
+            <InputBase
+              placeholder="Task Name"
+              value={taskName}
+              onChange={(e) => setTaskName(e.target.value)}
+              fullWidth
+              sx={{
+                border: "1px solid #ccc",
+                borderRadius: 1,
+                padding: 1,
+                mb: 2,
+              }}
+            />
+            <InputBase
+              placeholder="Task Description"
+              value={taskDescription}
+              onChange={(e) => settaskDescription(e.target.value)}
+              fullWidth
+              multiline
+              rows={4}
+              sx={{
+                border: "1px solid #ccc",
+                borderRadius: 1,
+                padding: 1,
+                mb: 2,
+              }}
+            />
+            <DialogActions>
+              <Button onClick={closeDialog}>Cancel</Button>
+              <Button type="submit" color="primary">
+                {editMode ? "Update" : "Add"}
+              </Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
         <DialogTitle>Delete Task</DialogTitle>
         <DialogContent>
